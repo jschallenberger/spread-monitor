@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spread Monitor — SP500 vs XYZ100 (Hyperliquid)</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --green: #3fb950;
+    --red: #f85149;
+    --blue: #58a6ff;
+    --yellow: #d29922;
+    --purple: #bc8cff;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px;
+  }
+  h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }
+  .status-bar {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 20px; font-size: 0.8rem; color: var(--muted);
+  }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
+  .status-dot.connected { background: var(--green); }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+  .card-title {
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--muted); margin-bottom: 12px;
+  }
+  .price-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .price-label { color: var(--muted); font-size: 0.85rem; }
+  .price-value { font-size: 1.1rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .price-big { font-size: 1.6rem; }
+  .pct { font-size: 1rem; font-weight: 600; }
+  .pct.positive { color: var(--green); }
+  .pct.negative { color: var(--red); }
+  .pct.neutral { color: var(--muted); }
+
+  .spread-card { grid-column: 1 / -1; }
+  .spread-value {
+    font-size: 2.2rem; font-weight: 700; text-align: center;
+    padding: 16px 0; font-variant-numeric: tabular-nums;
+  }
+  .spread-sub { text-align: center; color: var(--muted); font-size: 0.85rem; }
+  .spread-direction {
+    text-align: center; font-size: 0.95rem; margin-top: 8px;
+    padding: 8px 16px; border-radius: 8px; font-weight: 500;
+  }
+  .signal-long { background: rgba(63,185,80,0.12); color: var(--green); }
+  .signal-short { background: rgba(248,81,73,0.12); color: var(--red); }
+  .signal-neutral { background: rgba(139,148,158,0.1); color: var(--muted); }
+
+  .cme-section { margin-bottom: 20px; }
+  .cme-section .card { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .cme-section label { color: var(--muted); font-size: 0.8rem; }
+  .cme-section input, .cme-section select {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text); padding: 8px 12px; font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .cme-section input:focus, .cme-section select:focus { outline: none; border-color: var(--blue); }
+  .btn {
+    padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); cursor: pointer;
+    font-size: 0.85rem; transition: background 0.15s;
+  }
+  .btn:hover { background: var(--border); }
+  .btn-primary {
+    background: rgba(88,166,255,0.15); border-color: rgba(88,166,255,0.3); color: var(--blue);
+  }
+  .btn-primary:hover { background: rgba(88,166,255,0.25); }
+
+  .history-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.82rem; font-variant-numeric: tabular-nums;
+  }
+  .history-table th {
+    text-align: left; color: var(--muted); font-weight: 500;
+    padding: 8px 10px; border-bottom: 1px solid var(--border);
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .history-table td { padding: 6px 10px; border-bottom: 1px solid rgba(48,54,61,0.5); }
+  .history-wrap { max-height: 260px; overflow-y: auto; }
+  .history-wrap::-webkit-scrollbar { width: 6px; }
+  .history-wrap::-webkit-scrollbar-track { background: var(--card); }
+  .history-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .settings-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .settings-row label { font-size: 0.8rem; color: var(--muted); }
+  .settings-row input[type="number"] {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text); padding: 6px 10px; width: 70px; font-size: 0.85rem;
+  }
+  .settings-row input[type="number"]:focus { outline:none; border-color: var(--blue); }
+  .settings-row select {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text); padding: 6px 10px; font-size: 0.85rem;
+  }
+  .alert-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 0.7rem; font-weight: 600; animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .alert-badge.active { background: rgba(248,81,73,0.2); color: var(--red); }
+  .footer { margin-top: 20px; text-align: center; color: var(--muted); font-size: 0.7rem; }
+  .chart-container { position: relative; height: 180px; margin-top: 12px; }
+  canvas { width: 100% !important; }
+  .debug-log {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px; font-family: monospace; font-size: 0.75rem; color: var(--yellow);
+    max-height: 120px; overflow-y: auto; margin-top: 8px; white-space: pre-wrap;
+  }
+  .close-status {
+    font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; margin-left: 4px;
+  }
+  .close-status.ok { background: rgba(63,185,80,0.15); color: var(--green); }
+  .close-status.loading { background: rgba(210,153,34,0.15); color: var(--yellow); }
+  .close-status.error { background: rgba(248,81,73,0.15); color: var(--red); }
+</style>
+</head>
+<body>
+
+<h1>Spread Monitor</h1>
+<p class="subtitle">SP500 vs XYZ100 — Perpetuos Hyperliquid (off-hours CME)</p>
+
+<div class="status-bar">
+  <div class="status-dot" id="statusDot"></div>
+  <span id="statusText">Conectando...</span>
+  <span style="margin-left:auto" id="lastUpdate">—</span>
+</div>
+
+<!-- CME Close Time Input -->
+<div class="cme-section">
+  <div class="card">
+    <label>Horario fechamento CME (Brasil):</label>
+    <input type="time" id="cmeTime" value="10:10" style="width:120px">
+    <label>Data:</label>
+    <input type="date" id="cmeDate" style="width:160px">
+    <button class="btn btn-primary" id="btnBuscar" onclick="fetchClosePrices()">Buscar precos de fechamento</button>
+    <span class="close-status" id="closeStatus" style="display:none"></span>
+  </div>
+</div>
+
+<!-- Price Cards -->
+<div class="grid">
+  <div class="card">
+    <div class="card-title">SP500 — Hyperliquid (xyz:SP500)</div>
+    <div class="price-row">
+      <span class="price-label">Preco Atual</span>
+      <span class="price-value price-big" id="spPrice">—</span>
+    </div>
+    <div class="price-row">
+      <span class="price-label">CME Close</span>
+      <span class="price-value" id="spClose">—</span>
+    </div>
+    <div class="price-row">
+      <span class="price-label">Variacao</span>
+      <span class="pct neutral" id="spPct">—</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">XYZ100 — Hyperliquid (xyz:XYZ100)</div>
+    <div class="price-row">
+      <span class="price-label">Preco Atual</span>
+      <span class="price-value price-big" id="xyzPrice">—</span>
+    </div>
+    <div class="price-row">
+      <span class="price-label">CME Close</span>
+      <span class="price-value" id="xyzClose">—</span>
+    </div>
+    <div class="price-row">
+      <span class="price-label">Variacao</span>
+      <span class="pct neutral" id="xyzPct">—</span>
+    </div>
+  </div>
+
+  <!-- Spread -->
+  <div class="card spread-card">
+    <div class="card-title">Spread (XYZ100 % - SP500 %)</div>
+    <div class="spread-value" id="spreadValue">—</div>
+    <div class="spread-sub" id="spreadSub">Aguardando dados...</div>
+    <!-- Trade signal cards -->
+    <div id="tradeSignal" style="display:none;margin-top:16px">
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div id="tradeLeg1" style="flex:1;min-width:200px;padding:14px 16px;border-radius:10px;text-align:center"></div>
+        <div id="tradeLeg2" style="flex:1;min-width:200px;padding:14px 16px;border-radius:10px;text-align:center"></div>
+      </div>
+    </div>
+    <div id="noSignal" class="spread-direction signal-neutral">—</div>
+  </div>
+</div>
+
+<!-- Settings -->
+<div class="card" style="margin-bottom:16px">
+  <div class="card-title">Configuracoes</div>
+  <div class="settings-row">
+    <label>Atualizar a cada:</label>
+    <input type="number" id="refreshInterval" value="5" min="1" max="60">
+    <span style="color:var(--muted);font-size:0.8rem">segundos</span>
+    <label style="margin-left:16px">Alerta spread &gt;</label>
+    <input type="number" id="alertThreshold" value="0.15" step="0.01" min="0">
+    <span style="color:var(--muted);font-size:0.8rem">%</span>
+    <label style="margin-left:16px">Som:</label>
+    <select id="alertSound">
+      <option value="on">Ligado</option>
+      <option value="off">Desligado</option>
+    </select>
+    <span class="alert-badge" id="alertBadge" style="display:none">ALERTA</span>
+  </div>
+</div>
+
+<!-- Spread Chart -->
+<div class="card" style="margin-bottom:16px">
+  <div class="card-title">Historico do Spread</div>
+  <div class="chart-container">
+    <canvas id="spreadChart"></canvas>
+  </div>
+</div>
+
+<!-- History -->
+<div class="card" style="margin-bottom:16px">
+  <div class="card-title">Log de Precos</div>
+  <div class="history-wrap">
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Hora</th>
+          <th>SP500</th>
+          <th>SP %</th>
+          <th>XYZ100</th>
+          <th>XYZ %</th>
+          <th>Spread</th>
+        </tr>
+      </thead>
+      <tbody id="historyBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Debug -->
+<div class="card">
+  <div class="card-title">Debug / API Log</div>
+  <div class="debug-log" id="debugLog">Iniciando...</div>
+</div>
+
+<div class="footer">
+  Precos obtidos da API publica da Hyperliquid (api.hyperliquid.xyz). Ferramenta apenas informativa.
+</div>
+
+<script>
+// ——————————————————————————————————————————————
+// CONFIG
+// ——————————————————————————————————————————————
+const API = 'https://api.hyperliquid.xyz/info';
+const SP_COIN  = 'xyz:SP500';   // HIP-3 ticker for S&P 500
+const XYZ_COIN = 'xyz:XYZ100';  // HIP-3 ticker for Nasdaq 100
+
+// ——————————————————————————————————————————————
+// STATE
+// ——————————————————————————————————————————————
+let state = {
+  cmeSP: null,
+  cmeXYZ: null,
+  currentSP: null,
+  currentXYZ: null,
+  spTicker: null,   // actual ticker found in API
+  xyzTicker: null,  // actual ticker found in API
+  history: [],
+  spreadHistory: [],
+  timer: null,
+  connected: false,
+};
+
+// ——————————————————————————————————————————————
+// DEBUG LOG
+// ——————————————————————————————————————————————
+function log(msg) {
+  const el = document.getElementById('debugLog');
+  const ts = new Date().toLocaleTimeString('pt-BR');
+  el.textContent = `[${ts}] ${msg}\n` + el.textContent;
+  if (el.textContent.length > 5000) el.textContent = el.textContent.slice(0, 5000);
+  console.log(`[SpreadMonitor] ${msg}`);
+}
+
+// ——————————————————————————————————————————————
+// INIT
+// ——————————————————————————————————————————————
+document.addEventListener('DOMContentLoaded', () => {
+  // Set default date to today
+  const today = new Date();
+  document.getElementById('cmeDate').value = today.toISOString().split('T')[0];
+
+  loadSavedState();
+  startPolling();
+});
+
+function loadSavedState() {
+  try {
+    const saved = localStorage.getItem('spreadMonitorV2');
+    if (saved) {
+      const s = JSON.parse(saved);
+      if (s.cmeSP) state.cmeSP = s.cmeSP;
+      if (s.cmeXYZ) state.cmeXYZ = s.cmeXYZ;
+      if (s.cmeTime) document.getElementById('cmeTime').value = s.cmeTime;
+      if (s.cmeDate) document.getElementById('cmeDate').value = s.cmeDate;
+      if (s.alertThreshold) document.getElementById('alertThreshold').value = s.alertThreshold;
+      if (s.refreshInterval) document.getElementById('refreshInterval').value = s.refreshInterval;
+      updateCloseDisplay();
+      log(`Estado restaurado. Close SP: ${state.cmeSP}, Close XYZ: ${state.cmeXYZ}`);
+    }
+  } catch(e) { log('Erro ao carregar estado: ' + e.message); }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('spreadMonitorV2', JSON.stringify({
+      cmeSP: state.cmeSP,
+      cmeXYZ: state.cmeXYZ,
+      cmeTime: document.getElementById('cmeTime').value,
+      cmeDate: document.getElementById('cmeDate').value,
+      alertThreshold: document.getElementById('alertThreshold').value,
+      refreshInterval: document.getElementById('refreshInterval').value,
+    }));
+  } catch(e) {}
+}
+
+function updateCloseDisplay() {
+  document.getElementById('spClose').textContent = state.cmeSP ? state.cmeSP.toFixed(2) : '—';
+  document.getElementById('xyzClose').textContent = state.cmeXYZ ? state.cmeXYZ.toFixed(2) : '—';
+}
+
+// ——————————————————————————————————————————————
+// FETCH CME CLOSE PRICES (candleSnapshot)
+// ——————————————————————————————————————————————
+async function fetchClosePrices() {
+  const btn = document.getElementById('btnBuscar');
+  const statusEl = document.getElementById('closeStatus');
+  btn.disabled = true;
+  btn.textContent = 'Buscando...';
+  statusEl.style.display = 'inline-block';
+  statusEl.textContent = 'Buscando candles...';
+  statusEl.className = 'close-status loading';
+
+  const timeStr = document.getElementById('cmeTime').value; // "HH:MM"
+  const dateStr = document.getElementById('cmeDate').value; // "YYYY-MM-DD"
+
+  if (!timeStr || !dateStr) {
+    statusEl.textContent = 'Preencha data e horario';
+    statusEl.className = 'close-status error';
+    btn.disabled = false;
+    btn.textContent = 'Buscar precos de fechamento';
+    return;
+  }
+
+  // Parse date/time in local timezone (user's browser = BRT)
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  const [year, month, day] = dateStr.split('-').map(Number);
+
+  // The user informs the CME close time (e.g. 10:10).
+  // The correct candle is the 1m candle that CLOSED just before that time.
+  // A 1m candle with open time 10:09 closes at 10:10, so that's the one we want.
+  // We target the candle starting at (closeTime - 1 minute).
+  const closeTimeLocal = new Date(year, month - 1, day, hours, minutes, 0, 0);
+  const targetCandleOpenMs = closeTimeLocal.getTime() - (1 * 60 * 1000); // 1 min before = candle 10:09
+
+  // Fetch a small window around that candle to be safe
+  const startMs = targetCandleOpenMs - (5 * 60 * 1000);
+  const endMs   = targetCandleOpenMs + (5 * 60 * 1000);
+
+  log(`Fechamento CME: ${dateStr} ${timeStr} BRT`);
+  log(`Candle alvo: ${new Date(targetCandleOpenMs).toLocaleTimeString('pt-BR')} (1min antes do close)`);
+
+  let spClose = null;
+  let xyzClose = null;
+  let errors = [];
+
+  // Helper: find the 1m candle whose open time (t) matches targetCandleOpenMs
+  // If exact match not found, pick the candle with closest open time that is <= target
+  function findTargetCandle(candles, targetOpenMs) {
+    // Sort by open time ascending
+    const sorted = [...candles].sort((a, b) => a.t - b.t);
+
+    // Try exact match first
+    const exact = sorted.find(c => c.t === targetOpenMs);
+    if (exact) return exact;
+
+    // Otherwise find closest candle that opened at or just before target
+    let best = null;
+    for (const c of sorted) {
+      if (c.t <= targetOpenMs) {
+        best = c;
+      }
+    }
+    return best || sorted[sorted.length - 1]; // fallback to last candle
+  }
+
+  // Fetch SP500 candle
+  try {
+    const spData = await fetchCandle(SP_COIN, startMs, endMs);
+    if (spData && spData.length > 0) {
+      const candle = findTargetCandle(spData, targetCandleOpenMs);
+      spClose = parseFloat(candle.c);
+      log(`SP500 candle: open=${new Date(candle.t).toLocaleTimeString('pt-BR')}, close price=${candle.c}`);
+    } else {
+      errors.push('SP500: nenhum candle encontrado');
+      log('SP500: nenhum candle 1m retornado. Tentando 5m...');
+      const sp5m = await fetchCandle(SP_COIN, targetCandleOpenMs - (30*60*1000), targetCandleOpenMs + (30*60*1000), '5m');
+      if (sp5m && sp5m.length > 0) {
+        const candle = findTargetCandle(sp5m, targetCandleOpenMs);
+        spClose = parseFloat(candle.c);
+        log(`SP500 candle 5m: close price=${candle.c}`);
+      }
+    }
+  } catch(e) {
+    errors.push('SP500: ' + e.message);
+    log('Erro SP500: ' + e.message);
+  }
+
+  // Fetch XYZ100 candle
+  try {
+    const xyzData = await fetchCandle(XYZ_COIN, startMs, endMs);
+    if (xyzData && xyzData.length > 0) {
+      const candle = findTargetCandle(xyzData, targetCandleOpenMs);
+      xyzClose = parseFloat(candle.c);
+      log(`XYZ100 candle: open=${new Date(candle.t).toLocaleTimeString('pt-BR')}, close price=${candle.c}`);
+    } else {
+      errors.push('XYZ100: nenhum candle encontrado');
+      log('XYZ100: nenhum candle 1m retornado. Tentando 5m...');
+      const xyz5m = await fetchCandle(XYZ_COIN, targetCandleOpenMs - (30*60*1000), targetCandleOpenMs + (30*60*1000), '5m');
+      if (xyz5m && xyz5m.length > 0) {
+        const candle = findTargetCandle(xyz5m, targetCandleOpenMs);
+        xyzClose = parseFloat(candle.c);
+        log(`XYZ100 candle 5m: close price=${candle.c}`);
+      }
+    }
+  } catch(e) {
+    errors.push('XYZ100: ' + e.message);
+    log('Erro XYZ100: ' + e.message);
+  }
+
+  // Update state
+  if (spClose !== null) state.cmeSP = spClose;
+  if (xyzClose !== null) state.cmeXYZ = xyzClose;
+
+  updateCloseDisplay();
+  saveState();
+
+  // Clear history on new close prices
+  state.history = [];
+  state.spreadHistory = [];
+  document.getElementById('historyBody').innerHTML = '';
+  drawChart();
+
+  // Status
+  if (spClose !== null && xyzClose !== null) {
+    statusEl.textContent = `OK! SP500: ${spClose.toFixed(2)} | XYZ100: ${xyzClose.toFixed(2)}`;
+    statusEl.className = 'close-status ok';
+    log('Precos de fechamento definidos com sucesso.');
+  } else if (spClose !== null || xyzClose !== null) {
+    statusEl.textContent = 'Parcial: ' + errors.join('; ');
+    statusEl.className = 'close-status loading';
+  } else {
+    statusEl.textContent = 'Erro: ' + errors.join('; ');
+    statusEl.className = 'close-status error';
+    log('Tentando descobrir tickers disponiveis...');
+    await discoverTickers();
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Buscar precos de fechamento';
+}
+
+async function fetchCandle(coin, startMs, endMs, interval = '1m') {
+  const body = {
+    type: 'candleSnapshot',
+    req: {
+      coin: coin,
+      interval: interval,
+      startTime: startMs,
+      endTime: endMs,
+    }
+  };
+  log(`API call: candleSnapshot coin=${coin} interval=${interval}`);
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`HTTP ${res.status}: ${txt}`);
+  }
+  const data = await res.json();
+  log(`Resposta candleSnapshot ${coin}: ${data.length} candles`);
+  return data;
+}
+
+// ——————————————————————————————————————————————
+// DISCOVER AVAILABLE TICKERS (debug helper)
+// ——————————————————————————————————————————————
+async function discoverTickers() {
+  try {
+    // 1. allMids
+    const midRes = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'allMids' }),
+    });
+    const mids = await midRes.json();
+    const allTickers = Object.keys(mids).sort();
+
+    // Filter relevant
+    const relevant = allTickers.filter(t =>
+      /sp|xyz|nq|nas|500|100|usa|index/i.test(t)
+    );
+    log(`allMids tickers relevantes: ${relevant.length > 0 ? relevant.join(', ') : 'NENHUM'}`);
+    log(`allMids total: ${allTickers.length} tickers`);
+
+    // Check for our expected tickers
+    for (const t of [SP_COIN, XYZ_COIN, 'SP500', 'XYZ100', 'S&P500', '@0', '@1']) {
+      if (mids[t] !== undefined) {
+        log(`  -> "${t}" ENCONTRADO, mid=${mids[t]}`);
+      }
+    }
+
+    // Show first 30 tickers that contain ":"
+    const hip3 = allTickers.filter(t => t.includes(':'));
+    log(`Tickers HIP-3 (com ":"): ${hip3.length > 0 ? hip3.join(', ') : 'NENHUM'}`);
+
+    // 2. metaAndAssetCtxs
+    const metaRes = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'metaAndAssetCtxs' }),
+    });
+    const [meta, ctxs] = await metaRes.json();
+    const names = meta.universe.map(u => u.name);
+    const relevantMeta = names.filter(n => /sp|xyz|nq|nas|500|100|usa|index/i.test(n));
+    log(`metaAndAssetCtxs relevantes: ${relevantMeta.length > 0 ? relevantMeta.join(', ') : 'NENHUM'}`);
+
+    // Check all names for partial matches
+    if (relevantMeta.length === 0) {
+      // Show ALL names to find the right ones
+      log(`Todos os nomes no universe (${names.length}): ${names.slice(0, 50).join(', ')}${names.length > 50 ? '...' : ''}`);
+    }
+
+    // Try to find the tickers automatically
+    let foundSP = null, foundXYZ = null;
+    for (const t of allTickers) {
+      const tUp = t.toUpperCase();
+      if (!foundSP && (tUp.includes('SP500') || tUp.includes('S&P') || tUp.includes('USA500'))) {
+        foundSP = t;
+        log(`Auto-detect SP ticker: "${t}" = ${mids[t]}`);
+      }
+      if (!foundXYZ && (tUp.includes('XYZ100') || tUp.includes('NQ100') || tUp.includes('NASDAQ'))) {
+        foundXYZ = t;
+        log(`Auto-detect XYZ ticker: "${t}" = ${mids[t]}`);
+      }
+    }
+
+    if (foundSP) state.spTicker = foundSP;
+    if (foundXYZ) state.xyzTicker = foundXYZ;
+
+  } catch(e) {
+    log('Erro ao descobrir tickers: ' + e.message);
+  }
+}
+
+// ——————————————————————————————————————————————
+// FETCH CURRENT PRICES (3 strategies)
+// ——————————————————————————————————————————————
+async function fetchCurrentPrices() {
+  let spFound = false, xyzFound = false;
+
+  // ——— Strategy 1: allMids (fast, but may not include HIP-3) ———
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'allMids' }),
+    });
+    if (res.ok) {
+      const mids = await res.json();
+      const spCandidates = [SP_COIN, state.spTicker, 'SP500', 'S&P500', 'xyz:S&P500'].filter(Boolean);
+      const xyzCandidates = [XYZ_COIN, state.xyzTicker, 'XYZ100', 'xyz:XYZ100'].filter(Boolean);
+
+      for (const t of spCandidates) {
+        if (mids[t] !== undefined) {
+          state.currentSP = parseFloat(mids[t]);
+          if (state.spTicker !== t) { state.spTicker = t; log(`allMids SP500: "${t}" = ${mids[t]}`); }
+          spFound = true;
+          break;
+        }
+      }
+      for (const t of xyzCandidates) {
+        if (mids[t] !== undefined) {
+          state.currentXYZ = parseFloat(mids[t]);
+          if (state.xyzTicker !== t) { state.xyzTicker = t; log(`allMids XYZ100: "${t}" = ${mids[t]}`); }
+          xyzFound = true;
+          break;
+        }
+      }
+
+      // First time discovery
+      if ((!spFound || !xyzFound) && !state._discoveryDone) {
+        state._discoveryDone = true;
+        log('Tickers nao encontrados em allMids, rodando discovery...');
+        await discoverTickers();
+        // retry
+        if (state.spTicker && mids[state.spTicker] !== undefined) {
+          state.currentSP = parseFloat(mids[state.spTicker]); spFound = true;
+        }
+        if (state.xyzTicker && mids[state.xyzTicker] !== undefined) {
+          state.currentXYZ = parseFloat(mids[state.xyzTicker]); xyzFound = true;
+        }
+      }
+    }
+  } catch(e) { log('allMids erro: ' + e.message); }
+
+  // ——— Strategy 2: metaAndAssetCtxs (includes HIP-3 perps) ———
+  if (!spFound || !xyzFound) {
+    try {
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'metaAndAssetCtxs' }),
+      });
+      if (res.ok) {
+        const [meta, ctxs] = await res.json();
+        const names = meta.universe.map(u => u.name);
+
+        for (let i = 0; i < names.length; i++) {
+          const n = names[i];
+          const nUp = n.toUpperCase();
+          if (!spFound && (nUp === 'SP500' || nUp === 'S&P500' || nUp === 'USA500' || n === SP_COIN)) {
+            const px = ctxs[i]?.markPx || ctxs[i]?.midPx;
+            if (px) {
+              state.currentSP = parseFloat(px);
+              state.spTicker = n;
+              spFound = true;
+              log(`metaAndAssetCtxs SP500: "${n}" markPx=${px}`);
+            }
+          }
+          if (!xyzFound && (nUp === 'XYZ100' || nUp === 'NQ100' || nUp === 'NASDAQ100' || n === XYZ_COIN)) {
+            const px = ctxs[i]?.markPx || ctxs[i]?.midPx;
+            if (px) {
+              state.currentXYZ = parseFloat(px);
+              state.xyzTicker = n;
+              xyzFound = true;
+              log(`metaAndAssetCtxs XYZ100: "${n}" markPx=${px}`);
+            }
+          }
+        }
+
+        // If still not found, log relevant names
+        if (!spFound || !xyzFound) {
+          const relevant = names.filter(n => /sp|xyz|nq|nas|500|100|usa|index/i.test(n));
+          if (relevant.length > 0) {
+            log(`metaAndAssetCtxs relevantes: ${relevant.join(', ')}`);
+          }
+          // Also try partial match on HIP-3 dex names
+          for (let i = 0; i < names.length; i++) {
+            const n = names[i];
+            if (!spFound && /sp.*500/i.test(n)) {
+              const px = ctxs[i]?.markPx || ctxs[i]?.midPx;
+              if (px) { state.currentSP = parseFloat(px); state.spTicker = n; spFound = true; log(`SP500 partial match: "${n}" = ${px}`); }
+            }
+            if (!xyzFound && /xyz.*100/i.test(n)) {
+              const px = ctxs[i]?.markPx || ctxs[i]?.midPx;
+              if (px) { state.currentXYZ = parseFloat(px); state.xyzTicker = n; xyzFound = true; log(`XYZ100 partial match: "${n}" = ${px}`); }
+            }
+          }
+        }
+      }
+    } catch(e) { log('metaAndAssetCtxs erro: ' + e.message); }
+  }
+
+  // ——— Strategy 3: candleSnapshot last 2min (guaranteed to work if ticker exists) ———
+  if (!spFound || !xyzFound) {
+    const now = Date.now();
+    const twoMinAgo = now - (2 * 60 * 1000);
+
+    if (!spFound) {
+      try {
+        const candles = await fetchCandle(SP_COIN, twoMinAgo, now, '1m');
+        if (candles && candles.length > 0) {
+          const last = candles[candles.length - 1];
+          state.currentSP = parseFloat(last.c);
+          state.spTicker = SP_COIN;
+          spFound = true;
+          log(`candleSnapshot SP500: close=${last.c} (fallback)`);
+        }
+      } catch(e) { log('candleSnapshot SP500 fallback erro: ' + e.message); }
+    }
+
+    if (!xyzFound) {
+      try {
+        const candles = await fetchCandle(XYZ_COIN, twoMinAgo, now, '1m');
+        if (candles && candles.length > 0) {
+          const last = candles[candles.length - 1];
+          state.currentXYZ = parseFloat(last.c);
+          state.xyzTicker = XYZ_COIN;
+          xyzFound = true;
+          log(`candleSnapshot XYZ100: close=${last.c} (fallback)`);
+        }
+      } catch(e) { log('candleSnapshot XYZ100 fallback erro: ' + e.message); }
+    }
+  }
+
+  // Update connection status and UI
+  if (spFound || xyzFound) {
+    state.connected = true;
+  } else {
+    state.connected = false;
+    log('Nenhum preco encontrado em nenhuma estrategia.');
+  }
+  updateUI();
+}
+
+// ——————————————————————————————————————————————
+// UI UPDATE
+// ——————————————————————————————————————————————
+function updateUI() {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+
+  if (state.connected) {
+    dot.classList.add('connected');
+    const parts = [];
+    if (state.spTicker) parts.push(`SP=${state.spTicker}`);
+    if (state.xyzTicker) parts.push(`XYZ=${state.xyzTicker}`);
+    txt.textContent = 'Conectado' + (parts.length ? ' (' + parts.join(', ') + ')' : '');
+  } else {
+    dot.classList.remove('connected');
+    txt.textContent = 'Desconectado';
+  }
+
+  const now = new Date();
+  document.getElementById('lastUpdate').textContent =
+    'Atualizado: ' + now.toLocaleTimeString('pt-BR');
+
+  // SP500
+  document.getElementById('spPrice').textContent =
+    state.currentSP !== null ? state.currentSP.toFixed(2) : 'N/A';
+
+  // XYZ100
+  document.getElementById('xyzPrice').textContent =
+    state.currentXYZ !== null ? state.currentXYZ.toFixed(2) : 'N/A';
+
+  // Percentages
+  let spPct = null, xyzPct = null;
+
+  if (state.currentSP !== null && state.cmeSP) {
+    spPct = ((state.currentSP - state.cmeSP) / state.cmeSP) * 100;
+    const el = document.getElementById('spPct');
+    el.textContent = (spPct >= 0 ? '+' : '') + spPct.toFixed(4) + '%';
+    el.className = 'pct ' + (spPct > 0 ? 'positive' : spPct < 0 ? 'negative' : 'neutral');
+  } else {
+    document.getElementById('spPct').textContent = '—';
+    document.getElementById('spPct').className = 'pct neutral';
+  }
+
+  if (state.currentXYZ !== null && state.cmeXYZ) {
+    xyzPct = ((state.currentXYZ - state.cmeXYZ) / state.cmeXYZ) * 100;
+    const el = document.getElementById('xyzPct');
+    el.textContent = (xyzPct >= 0 ? '+' : '') + xyzPct.toFixed(4) + '%';
+    el.className = 'pct ' + (xyzPct > 0 ? 'positive' : xyzPct < 0 ? 'negative' : 'neutral');
+  } else {
+    document.getElementById('xyzPct').textContent = '—';
+    document.getElementById('xyzPct').className = 'pct neutral';
+  }
+
+  // Spread
+  const spreadEl = document.getElementById('spreadValue');
+  const spreadSub = document.getElementById('spreadSub');
+
+  if (spPct !== null && xyzPct !== null) {
+    const spread = xyzPct - spPct;
+    const absSpread = Math.abs(spread);
+    spreadEl.textContent = (spread >= 0 ? '+' : '') + spread.toFixed(4) + '%';
+    spreadEl.style.color = absSpread > 0.1 ? (spread > 0 ? 'var(--green)' : 'var(--red)') : 'var(--text)';
+
+    spreadSub.textContent = `XYZ100: ${xyzPct >= 0 ? '+' : ''}${xyzPct.toFixed(4)}%  |  SP500: ${spPct >= 0 ? '+' : ''}${spPct.toFixed(4)}%`;
+
+    const threshold = parseFloat(document.getElementById('alertThreshold').value) || 0.15;
+    const tradeSignalEl = document.getElementById('tradeSignal');
+    const noSignalEl = document.getElementById('noSignal');
+    const leg1 = document.getElementById('tradeLeg1');
+    const leg2 = document.getElementById('tradeLeg2');
+
+    const fmtPct = (v) => (v >= 0 ? '+' : '') + v.toFixed(4) + '%';
+
+    if (absSpread >= threshold) {
+      tradeSignalEl.style.display = 'block';
+      noSignalEl.style.display = 'none';
+
+      if (spread > 0) {
+        // XYZ100 esticou mais → short XYZ, long SP
+        leg1.style.background = 'rgba(63,185,80,0.1)';
+        leg1.style.border = '1px solid rgba(63,185,80,0.3)';
+        leg1.innerHTML = `
+          <div style="color:var(--green);font-weight:700;font-size:1.2em;margin-bottom:6px">LONG SP500</div>
+          <div style="color:var(--text);font-size:0.95em">CME close: <strong>${state.cmeSP.toFixed(2)}</strong></div>
+          <div style="color:var(--text);font-size:0.95em">Atual: <strong>${state.currentSP.toFixed(2)}</strong></div>
+          <div style="color:var(--muted);font-size:0.85em;margin-top:4px">Variacao: <span style="color:${spPct >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtPct(spPct)}</span></div>
+          <div style="color:var(--muted);font-size:0.78em;margin-top:6px">Ficou atras do XYZ100 — espera-se que convirja para cima</div>
+        `;
+        leg2.style.background = 'rgba(248,81,73,0.1)';
+        leg2.style.border = '1px solid rgba(248,81,73,0.3)';
+        leg2.innerHTML = `
+          <div style="color:var(--red);font-weight:700;font-size:1.2em;margin-bottom:6px">SHORT XYZ100</div>
+          <div style="color:var(--text);font-size:0.95em">CME close: <strong>${state.cmeXYZ.toFixed(2)}</strong></div>
+          <div style="color:var(--text);font-size:0.95em">Atual: <strong>${state.currentXYZ.toFixed(2)}</strong></div>
+          <div style="color:var(--muted);font-size:0.85em;margin-top:4px">Variacao: <span style="color:${xyzPct >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtPct(xyzPct)}</span></div>
+          <div style="color:var(--muted);font-size:0.78em;margin-top:6px">Esticou mais que o SP500 — espera-se que convirja para baixo</div>
+        `;
+      } else {
+        // SP500 esticou mais → short SP, long XYZ
+        leg1.style.background = 'rgba(63,185,80,0.1)';
+        leg1.style.border = '1px solid rgba(63,185,80,0.3)';
+        leg1.innerHTML = `
+          <div style="color:var(--green);font-weight:700;font-size:1.2em;margin-bottom:6px">LONG XYZ100</div>
+          <div style="color:var(--text);font-size:0.95em">CME close: <strong>${state.cmeXYZ.toFixed(2)}</strong></div>
+          <div style="color:var(--text);font-size:0.95em">Atual: <strong>${state.currentXYZ.toFixed(2)}</strong></div>
+          <div style="color:var(--muted);font-size:0.85em;margin-top:4px">Variacao: <span style="color:${xyzPct >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtPct(xyzPct)}</span></div>
+          <div style="color:var(--muted);font-size:0.78em;margin-top:6px">Ficou atras do SP500 — espera-se que convirja para cima</div>
+        `;
+        leg2.style.background = 'rgba(248,81,73,0.1)';
+        leg2.style.border = '1px solid rgba(248,81,73,0.3)';
+        leg2.innerHTML = `
+          <div style="color:var(--red);font-weight:700;font-size:1.2em;margin-bottom:6px">SHORT SP500</div>
+          <div style="color:var(--text);font-size:0.95em">CME close: <strong>${state.cmeSP.toFixed(2)}</strong></div>
+          <div style="color:var(--text);font-size:0.95em">Atual: <strong>${state.currentSP.toFixed(2)}</strong></div>
+          <div style="color:var(--muted);font-size:0.85em;margin-top:4px">Variacao: <span style="color:${spPct >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtPct(spPct)}</span></div>
+          <div style="color:var(--muted);font-size:0.78em;margin-top:6px">Esticou mais que o XYZ100 — espera-se que convirja para baixo</div>
+        `;
+      }
+
+      document.getElementById('alertBadge').style.display = 'inline-block';
+      document.getElementById('alertBadge').className = 'alert-badge active';
+      if (document.getElementById('alertSound').value === 'on') playAlert();
+    } else {
+      tradeSignalEl.style.display = 'none';
+      noSignalEl.style.display = 'block';
+      noSignalEl.textContent = `Spread dentro do range normal (< ${threshold}%)`;
+      noSignalEl.className = 'spread-direction signal-neutral';
+      document.getElementById('alertBadge').style.display = 'none';
+    }
+
+    // History
+    const entry = {
+      time: now.toLocaleTimeString('pt-BR'),
+      sp: state.currentSP, spPct,
+      xyz: state.currentXYZ, xyzPct,
+      spread,
+    };
+    state.history.unshift(entry);
+    if (state.history.length > 200) state.history.pop();
+    state.spreadHistory.push({ time: now, spread });
+    if (state.spreadHistory.length > 500) state.spreadHistory.shift();
+    addHistoryRow(entry);
+    drawChart();
+
+  } else {
+    spreadEl.textContent = '—';
+    spreadEl.style.color = 'var(--text)';
+    if (!state.cmeSP && !state.cmeXYZ) {
+      spreadSub.textContent = 'Clique "Buscar precos de fechamento" para iniciar';
+    } else if (state.currentSP === null || state.currentXYZ === null) {
+      spreadSub.textContent = 'Aguardando precos atuais dos ativos...';
+    }
+    document.getElementById('tradeSignal').style.display = 'none';
+    const ns = document.getElementById('noSignal');
+    ns.style.display = 'block';
+    ns.textContent = '—';
+    ns.className = 'spread-direction signal-neutral';
+  }
+}
+
+function addHistoryRow(entry) {
+  const tbody = document.getElementById('historyBody');
+  const tr = document.createElement('tr');
+  const sc = Math.abs(entry.spread) > 0.1
+    ? (entry.spread > 0 ? 'var(--green)' : 'var(--red)') : 'var(--text)';
+  tr.innerHTML = `
+    <td>${entry.time}</td>
+    <td>${entry.sp.toFixed(2)}</td>
+    <td style="color:${entry.spPct >= 0 ? 'var(--green)' : 'var(--red)'}">${entry.spPct >= 0 ? '+' : ''}${entry.spPct.toFixed(4)}%</td>
+    <td>${entry.xyz.toFixed(2)}</td>
+    <td style="color:${entry.xyzPct >= 0 ? 'var(--green)' : 'var(--red)'}">${entry.xyzPct >= 0 ? '+' : ''}${entry.xyzPct.toFixed(4)}%</td>
+    <td style="color:${sc};font-weight:600">${entry.spread >= 0 ? '+' : ''}${entry.spread.toFixed(4)}%</td>
+  `;
+  tbody.firstChild ? tbody.insertBefore(tr, tbody.firstChild) : tbody.appendChild(tr);
+  while (tbody.children.length > 100) tbody.removeChild(tbody.lastChild);
+}
+
+// ——————————————————————————————————————————————
+// CHART
+// ——————————————————————————————————————————————
+function drawChart() {
+  const canvas = document.getElementById('spreadChart');
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  ctx.scale(dpr, dpr);
+  const w = rect.width, h = rect.height;
+  const pad = { top: 20, right: 60, bottom: 30, left: 10 };
+  ctx.clearRect(0, 0, w, h);
+
+  const data = state.spreadHistory;
+  if (data.length < 2) {
+    ctx.fillStyle = '#8b949e';
+    ctx.font = '13px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Aguardando dados...', w / 2, h / 2);
+    return;
+  }
+
+  const spreads = data.map(d => d.spread);
+  const minS = Math.min(...spreads, -0.05);
+  const maxS = Math.max(...spreads, 0.05);
+  const range = maxS - minS || 0.1;
+  const chartW = w - pad.left - pad.right;
+  const chartH = h - pad.top - pad.bottom;
+  const xScale = (i) => pad.left + (i / (data.length - 1)) * chartW;
+  const yScale = (v) => pad.top + chartH - ((v - minS) / range) * chartH;
+
+  // Zero line
+  ctx.strokeStyle = 'rgba(139,148,158,0.3)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(pad.left, yScale(0));
+  ctx.lineTo(w - pad.right, yScale(0));
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Threshold lines
+  const threshold = parseFloat(document.getElementById('alertThreshold').value) || 0.15;
+  ctx.strokeStyle = 'rgba(248,81,73,0.2)';
+  ctx.setLineDash([2, 4]);
+  [threshold, -threshold].forEach(v => {
+    ctx.beginPath();
+    ctx.moveTo(pad.left, yScale(v));
+    ctx.lineTo(w - pad.right, yScale(v));
+    ctx.stroke();
+  });
+  ctx.setLineDash([]);
+
+  // Spread line
+  ctx.strokeStyle = '#58a6ff';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  data.forEach((d, i) => {
+    const x = xScale(i), y = yScale(d.spread);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Fill
+  ctx.globalAlpha = 0.08;
+  ctx.beginPath();
+  ctx.moveTo(xScale(0), yScale(0));
+  data.forEach((d, i) => ctx.lineTo(xScale(i), yScale(d.spread)));
+  ctx.lineTo(xScale(data.length - 1), yScale(0));
+  ctx.closePath();
+  ctx.fillStyle = data[data.length - 1].spread >= 0 ? '#3fb950' : '#f85149';
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Y labels
+  ctx.fillStyle = '#8b949e';
+  ctx.font = '11px -apple-system, sans-serif';
+  ctx.textAlign = 'left';
+  for (let i = 0; i <= 5; i++) {
+    const v = minS + (range / 5) * i;
+    ctx.fillText((v >= 0 ? '+' : '') + v.toFixed(3) + '%', w - pad.right + 4, yScale(v) + 4);
+  }
+
+  // Time labels
+  ctx.textAlign = 'center';
+  const steps = Math.min(5, data.length);
+  for (let i = 0; i < steps; i++) {
+    const idx = Math.floor((i / (steps - 1)) * (data.length - 1));
+    ctx.fillText(data[idx].time.toLocaleTimeString?.('pt-BR', {hour:'2-digit',minute:'2-digit'}) || data[idx].time,
+      xScale(idx), h - 8);
+  }
+
+  // Dot
+  const last = data[data.length - 1];
+  ctx.beginPath();
+  ctx.arc(xScale(data.length - 1), yScale(last.spread), 4, 0, Math.PI * 2);
+  ctx.fillStyle = last.spread >= 0 ? '#3fb950' : '#f85149';
+  ctx.fill();
+}
+
+// ——————————————————————————————————————————————
+// AUDIO
+// ——————————————————————————————————————————————
+function playAlert() {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.frequency.value = 800; o.type = 'sine'; g.gain.value = 0.15;
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.3);
+    o.stop(ac.currentTime + 0.3);
+  } catch(e) {}
+}
+
+// ——————————————————————————————————————————————
+// POLLING
+// ——————————————————————————————————————————————
+function startPolling() {
+  fetchCurrentPrices();
+  clearInterval(state.timer);
+  const ms = (parseInt(document.getElementById('refreshInterval').value) || 5) * 1000;
+  state.timer = setInterval(fetchCurrentPrices, ms);
+  log(`Polling iniciado a cada ${ms/1000}s`);
+}
+
+document.getElementById('refreshInterval').addEventListener('change', () => {
+  startPolling();
+  saveState();
+});
+document.getElementById('alertThreshold').addEventListener('change', saveState);
+window.addEventListener('resize', drawChart);
+</script>
+
+</body>
+</html>
