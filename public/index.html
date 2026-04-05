@@ -107,6 +107,21 @@ table { width:100%; border-collapse:collapse; font-size:0.79rem; font-variant-nu
 th { text-align:left; color:var(--muted); font-weight:500; padding:7px 9px; border-bottom:1px solid var(--border); font-size:0.7rem; text-transform:uppercase; }
 td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
 
+/* ——— P&L CALC ——— */
+.pnl-row { background:rgba(88,166,255,0.05); border:1px solid rgba(88,166,255,0.15); border-radius:9px; padding:12px 14px; margin-top:12px; }
+.pnl-title { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--blue); font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+.pnl-title span { font-size:0.65rem; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; }
+.pnl-inputs { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px; }
+.pnl-input-grp { display:flex; align-items:center; gap:6px; font-size:0.78rem; color:var(--muted); }
+.pnl-input-grp strong { color:var(--text); font-size:0.75rem; }
+.pnl-input-grp input { background:var(--bg); border:1px solid var(--border); border-radius:5px; color:var(--text); padding:4px 8px; font-size:0.85rem; width:108px; font-variant-numeric:tabular-nums; }
+.pnl-input-grp input:focus { outline:none; border-color:var(--blue); }
+.pnl-results { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+@media(max-width:580px){ .pnl-results { grid-template-columns:repeat(2,1fr); } }
+.pnl-item { background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:8px 10px; text-align:center; }
+.pnl-item-lbl { font-size:0.66rem; text-transform:uppercase; letter-spacing:0.4px; color:var(--muted); margin-bottom:4px; }
+.pnl-item-val { font-size:0.97rem; font-weight:700; font-variant-numeric:tabular-nums; }
+
 /* ——— DEBUG ——— */
 .debug-box { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:9px; font-family:monospace; font-size:0.7rem; color:var(--yellow); max-height:100px; overflow-y:auto; margin-top:8px; white-space:pre-wrap; }
 
@@ -166,6 +181,26 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
       <div class="leg leg-neutral" style="flex:1">
         <div class="leg-label" style="color:var(--muted)">—</div>
         <div class="leg-desc">Busque o fechamento CME para ver o sinal</div>
+      </div>
+    </div>
+    <!-- P&L Calculator -->
+    <div class="pnl-row">
+      <div class="pnl-title">P&amp;L se spread → 0 <span>(esticado corrige · lagging fica parado)</span></div>
+      <div class="pnl-inputs">
+        <div class="pnl-input-grp">
+          <strong id="eq-pnl-lbl-a">SP500</strong>
+          <input type="number" id="eq-size-a" value="10000" min="0" step="1000" oninput="updatePnl('eq')"> USD
+        </div>
+        <div class="pnl-input-grp">
+          <strong id="eq-pnl-lbl-b">XYZ100</strong>
+          <input type="number" id="eq-size-b" value="10000" min="0" step="1000" oninput="updatePnl('eq')"> USD
+        </div>
+      </div>
+      <div class="pnl-results">
+        <div class="pnl-item"><div class="pnl-item-lbl" id="eq-pnl-side-a">SP500 leg</div><div class="pnl-item-val neu" id="eq-pnl-a">—</div></div>
+        <div class="pnl-item"><div class="pnl-item-lbl" id="eq-pnl-side-b">XYZ100 leg</div><div class="pnl-item-val neu" id="eq-pnl-b">—</div></div>
+        <div class="pnl-item"><div class="pnl-item-lbl">Total</div><div class="pnl-item-val neu" id="eq-pnl-total">—</div></div>
+        <div class="pnl-item"><div class="pnl-item-lbl">ROI</div><div class="pnl-item-val neu" id="eq-pnl-roi">—</div></div>
       </div>
     </div>
   </div>
@@ -297,6 +332,26 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
       <div class="leg leg-neutral" style="flex:1">
         <div class="leg-label" style="color:var(--muted)">—</div>
         <div class="leg-desc">Busque o fechamento CME para ver o sinal</div>
+      </div>
+    </div>
+    <!-- P&L Calculator -->
+    <div class="pnl-row">
+      <div class="pnl-title">P&amp;L se spread → 0 <span>(esticado corrige · lagging fica parado)</span></div>
+      <div class="pnl-inputs">
+        <div class="pnl-input-grp">
+          <strong id="oil-pnl-lbl-a">Brent</strong>
+          <input type="number" id="oil-size-a" value="10000" min="0" step="1000" oninput="updatePnl('oil')"> USD
+        </div>
+        <div class="pnl-input-grp">
+          <strong id="oil-pnl-lbl-b">CL</strong>
+          <input type="number" id="oil-size-b" value="10000" min="0" step="1000" oninput="updatePnl('oil')"> USD
+        </div>
+      </div>
+      <div class="pnl-results">
+        <div class="pnl-item"><div class="pnl-item-lbl" id="oil-pnl-side-a">Brent leg</div><div class="pnl-item-val neu" id="oil-pnl-a">—</div></div>
+        <div class="pnl-item"><div class="pnl-item-lbl" id="oil-pnl-side-b">CL leg</div><div class="pnl-item-val neu" id="oil-pnl-b">—</div></div>
+        <div class="pnl-item"><div class="pnl-item-lbl">Total</div><div class="pnl-item-val neu" id="oil-pnl-total">—</div></div>
+        <div class="pnl-item"><div class="pnl-item-lbl">ROI</div><div class="pnl-item-val neu" id="oil-pnl-roi">—</div></div>
       </div>
     </div>
   </div>
@@ -450,6 +505,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   ['eq','oil'].forEach(p => {
     loadState(p);
+    // Restore saved position sizes
+    try {
+      const saved = JSON.parse(localStorage.getItem('sm_pnl_' + p) || '{}');
+      if (saved.sA) document.getElementById(p + '-size-a').value = saved.sA;
+      if (saved.sB) document.getElementById(p + '-size-b').value = saved.sB;
+    } catch(e) {}
     startPolling(p);
     document.getElementById(p + '-refresh').addEventListener('change', () => startPolling(p));
   });
@@ -919,6 +980,9 @@ function updateUI(pair) {
   // Trade legs
   renderLegs(pair, spread, pcts, closes, prices, labels, threshold);
 
+  // P&L Calculator
+  updatePnl(pair, spread, labels);
+
   // Z-Score
   const zEl = document.getElementById(pair + '-zscore');
   if (zscore !== null) {
@@ -971,6 +1035,75 @@ function updateUI(pair) {
 
   // Chart
   drawChart(pair);
+}
+
+// ══════════════════════════════════════════════════════════════
+// P&L CALCULATOR
+// ══════════════════════════════════════════════════════════════
+function updatePnl(pair, spread, labels) {
+  // If called from oninput, read current spread from state
+  if (spread === undefined) {
+    const s = S[pair];
+    const cfg = PAIRS[pair];
+    if (s.curA === null || s.curB === null || !s.closeA || !s.closeB) return;
+    const pctA = ((s.curA - s.closeA) / s.closeA) * 100;
+    const pctB = ((s.curB - s.closeB) / s.closeB) * 100;
+    spread = pctB - pctA;
+    labels = [cfg.a.label, cfg.b.label];
+  }
+
+  const sA = parseFloat(document.getElementById(pair + '-size-a').value) || 0;
+  const sB = parseFloat(document.getElementById(pair + '-size-b').value) || 0;
+  const absSpread = Math.abs(spread);
+
+  // spread = B% - A%.
+  // spread > 0: B stretched → SHORT B, LONG A (A é lagging, fica parado)
+  // spread < 0: A stretched → SHORT A, LONG B (B é lagging, fica parado)
+  const aIsLong = spread > 0;
+  const sideA = aIsLong ? 'LONG' : 'SHORT';
+  const sideB = aIsLong ? 'SHORT' : 'LONG';
+
+  // P&L: apenas o leg SHORT (esticado) se move de volta; o LONG (lagging) fica parado.
+  // O esticado corrige pelo valor do spread inteiro.
+  let pnlA, pnlB;
+  if (aIsLong) {
+    pnlA = 0;                         // A é LONG → fica parado
+    pnlB = sB * absSpread / 100;      // B é SHORT → corrige pelo spread
+  } else {
+    pnlA = sA * absSpread / 100;      // A é SHORT → corrige pelo spread
+    pnlB = 0;                         // B é LONG → fica parado
+  }
+  const total = pnlA + pnlB;
+  const roi = (sA + sB) > 0 ? total / (sA + sB) * 100 : 0;
+
+  const fmt$ = v => v > 0 ? '+$' + v.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '$0';
+  const fmtR = v => v > 0 ? '+' + v.toFixed(3) + '%' : '0%';
+
+  document.getElementById(pair + '-pnl-lbl-a').textContent = labels[0];
+  document.getElementById(pair + '-pnl-lbl-b').textContent = labels[1];
+  document.getElementById(pair + '-pnl-side-a').textContent = sideA + ' ' + labels[0];
+  document.getElementById(pair + '-pnl-side-b').textContent = sideB + ' ' + labels[1];
+
+  const elA = document.getElementById(pair + '-pnl-a');
+  const elB = document.getElementById(pair + '-pnl-b');
+  const elT = document.getElementById(pair + '-pnl-total');
+  const elR = document.getElementById(pair + '-pnl-roi');
+
+  elA.textContent = sA > 0 ? fmt$(pnlA) : '—';
+  elA.className = 'pnl-item-val ' + (pnlA > 0 ? 'pos' : 'neu');
+  elB.textContent = sB > 0 ? fmt$(pnlB) : '—';
+  elB.className = 'pnl-item-val ' + (pnlB > 0 ? 'pos' : 'neu');
+
+  if (sA > 0 || sB > 0) {
+    elT.textContent = fmt$(total); elT.className = 'pnl-item-val pos';
+    elR.textContent = fmtR(roi);   elR.className = 'pnl-item-val pos';
+  } else {
+    elT.textContent = '—'; elT.className = 'pnl-item-val neu';
+    elR.textContent = '—'; elR.className = 'pnl-item-val neu';
+  }
+
+  // Persist sizes
+  try { localStorage.setItem('sm_pnl_' + pair, JSON.stringify({ sA, sB })); } catch(e) {}
 }
 
 // ══════════════════════════════════════════════════════════════
