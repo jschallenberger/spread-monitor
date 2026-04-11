@@ -426,8 +426,22 @@ function switchTab(t) {
   document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['eq','oil'][i] === t));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.getElementById('tab-' + t).classList.add('active');
+  updateTitle(t);
 }
-
+  
+function updateTitle(pair) {
+  if (pair !== activeTab) return;
+  const s = S[pair];
+  if (s.curA == null || s.curB == null || !s.closeA || !s.closeB) {
+    document.title = 'hl-analyzer';
+    return;
+  }
+  const pctA = ((s.curA - s.closeA) / s.closeA) * 100;
+  const pctB = ((s.curB - s.closeB) / s.closeB) * 100;
+  const spread = pctB - pctA;
+  const sign = spread >= 0 ? '+' : '';
+  document.title = `${sign}${spread.toFixed(3)}% · hl-analyzer`;
+}
 // ══════════════════════════════════════════════════════════════
 // LOG
 // ══════════════════════════════════════════════════════════════
@@ -766,6 +780,7 @@ async function fetchPrices(pair) {
 
   S[pair].connected = foundA || foundB;
   updateUI(pair);
+  updateTitle(pair);
 }
 
 // ══════════════════════════════════════════════════════════════
