@@ -181,6 +181,26 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
       </div>
     </div>
   </div>
+  <!-- Funding Rates (Hyperliquid) -->
+  <div class="signal-row">
+    <div class="signal-grid">
+      <div class="sig-card">
+        <div class="sig-label">Funding <span id="eq-funding-lbl-a">SP500</span></div>
+        <div class="sig-val neu" id="eq-funding-a">—</div>
+        <div class="sig-sub">por hora</div>
+      </div>
+      <div class="sig-card">
+        <div class="sig-label">Funding <span id="eq-funding-lbl-b">XYZ100</span></div>
+        <div class="sig-val neu" id="eq-funding-b">—</div>
+        <div class="sig-sub">por hora</div>
+      </div>
+      <div class="sig-card">
+        <div class="sig-label">Funding Diff (B − A)</div>
+        <div class="sig-val neu" id="eq-funding-diff">—</div>
+        <div class="sig-sub" id="eq-funding-reading">aguardando dados</div>
+      </div>
+    </div>
+  </div>
   <!-- Signal quality -->
   <div class="signal-row">
     <div class="signal-grid">
@@ -323,6 +343,26 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
       </div>
     </div>
   </div>
+  <!-- Funding Rates (Hyperliquid) -->
+  <div class="signal-row">
+    <div class="signal-grid">
+      <div class="sig-card">
+        <div class="sig-label">Funding <span id="oil-funding-lbl-a">Brent</span></div>
+        <div class="sig-val neu" id="oil-funding-a">—</div>
+        <div class="sig-sub">por hora</div>
+      </div>
+      <div class="sig-card">
+        <div class="sig-label">Funding <span id="oil-funding-lbl-b">CL</span></div>
+        <div class="sig-val neu" id="oil-funding-b">—</div>
+        <div class="sig-sub">por hora</div>
+      </div>
+      <div class="sig-card">
+        <div class="sig-label">Funding Diff (CL − Brent)</div>
+        <div class="sig-val neu" id="oil-funding-diff">—</div>
+        <div class="sig-sub" id="oil-funding-reading">aguardando dados</div>
+      </div>
+    </div>
+  </div>
   <!-- Signal quality -->
   <div class="signal-row">
     <div class="signal-grid">
@@ -430,6 +470,8 @@ function mkState() {
     closeA: null, closeB: null,
     curA: null,   curB: null,
     tickerA: null, tickerB: null,
+    fundingA: null, fundingB: null,       // funding rate atual (hora) — fracionário (0.0001 = 0.01%/h)
+    fundingHistory: [],                    // [{time, fundingA, fundingB, diff}]
     spreadHistory: [],  // [{time, spread}]
     maxSamples: DEFAULT_MAX_SAMPLES,
     timer: null, connected: false, discoveryDone: false,
@@ -740,24 +782,59 @@ async function fetchPrices(pair) {
       }
     }
   } catch(e) { log(pair, 'allMids err: ' + e.message); }
-  if (!foundA || !foundB) {
+  // Sempre chama metaAndAssetCtxs — precisamos do funding a cada tick, além de servir como
+  // fallback pra preço quando allMids não bateu com nenhum candidato.
+  // Ativos HIP-3 (prefix "xyz:" por exemplo) estão num builder dex — precisamos passar
+  // o parâmetro `dex` senão a API retorna só o universo core e nada bate.
+  const dexes = new Set();
+  [cfg.a.coin, ...cfg.a.candidates, cfg.b.coin, ...cfg.b.candidates].forEach(c => {
+    if (c && c.includes(':')) dexes.add(c.split(':')[0]);
+  });
+  // Se nenhum candidato tem prefixo, ainda chamamos o universo core (dex vazio/default).
+  const dexList = dexes.size > 0 ? [...dexes] : [''];
+  for (const dex of dexList) {
     try {
-      const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({type:'metaAndAssetCtxs'}) });
-      if (res.ok) {
-        const [meta, ctxs] = await res.json();
-        const names = meta.universe.map(u => u.name);
-        names.forEach((n, i) => {
-          const nUp = n.toUpperCase();
-          const px = ctxs[i]?.markPx || ctxs[i]?.midPx;
-          if (!foundA && cfg.a.candidates.some(c => c.toUpperCase() === nUp || nUp.includes(c.replace('xyz:','').toUpperCase()))) {
-            if (px) { S[pair].curA = parseFloat(px); S[pair].tickerA = n; foundA = true; }
-          }
-          if (!foundB && cfg.b.candidates.some(c => c.toUpperCase() === nUp || nUp.includes(c.replace('xyz:','').toUpperCase()))) {
-            if (px) { S[pair].curB = parseFloat(px); S[pair].tickerB = n; foundB = true; }
-          }
+      const body = dex ? { type:'metaAndAssetCtxs', dex } : { type:'metaAndAssetCtxs' };
+      const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+      if (!res.ok) continue;
+      const resp = await res.json();
+      if (!Array.isArray(resp) || resp.length < 2) continue;
+      const [meta, ctxs] = resp;
+      if (!meta || !meta.universe) continue;
+      const names = meta.universe.map(u => u.name);
+      names.forEach((n, i) => {
+        const nUp = n.toUpperCase();
+        // Não duplica prefixo: se n já vem como "xyz:CL", mantém. Senão concatena dex.
+        const fullName = (dex && !n.includes(':')) ? `${dex}:${n}` : n;
+        const fullUp = fullName.toUpperCase();
+        const px = ctxs[i]?.markPx || ctxs[i]?.midPx;
+        const fd = ctxs[i]?.funding;
+        // Match SOMENTE por igualdade exata. Match por substring (nUp.includes) causava
+        // falso positivo: "ORCL".includes("CL") === true → ORCL era matched como CL.
+        const matchesAny = (candidates) => candidates.some(c => {
+          const cu = c.toUpperCase();
+          const cuBase = c.replace(/^[^:]+:/, '').toUpperCase();
+          return cu === nUp || cu === fullUp || cuBase === nUp;
         });
-      }
-    } catch(e) { log(pair, 'meta err: ' + e.message); }
+        const matchA = matchesAny(cfg.a.candidates);
+        const matchB = matchesAny(cfg.b.candidates);
+        if (matchA) {
+          if (fd !== undefined && fd !== null && fd !== '') {
+            const parsed = parseFloat(fd);
+            if (!Number.isNaN(parsed)) S[pair].fundingA = parsed;
+          }
+          if (!foundA && px) { S[pair].curA = parseFloat(px); S[pair].tickerA = fullName; foundA = true; }
+        }
+        if (matchB) {
+          if (fd !== undefined && fd !== null && fd !== '') {
+            const parsed = parseFloat(fd);
+            if (!Number.isNaN(parsed)) S[pair].fundingB = parsed;
+          }
+          if (!foundB && px) { S[pair].curB = parseFloat(px); S[pair].tickerB = fullName; foundB = true; }
+        }
+      });
+      log(pair, `meta dex="${dex || 'core'}": ${names.length} ativos | fundingA=${S[pair].fundingA} fundingB=${S[pair].fundingB}`);
+    } catch(e) { log(pair, `meta err (dex=${dex}): ${e.message}`); }
   }
   const now = Date.now();
   if (!foundA) {
@@ -789,10 +866,17 @@ async function discover(pair) {
     const cfg = PAIRS[pair];
     for (const t of all) {
       const tu = t.toUpperCase();
-      if (!S[pair].tickerA && cfg.a.candidates.some(c => tu === c.toUpperCase() || tu.includes(c.replace('xyz:','').toUpperCase()))) {
+      // Match estrito: igualdade exata OU igual ao candidato sem prefixo dex.
+      // NÃO usar substring — "ORCL" bate em "CL" e causa match errado.
+      const matchCandidate = (cands) => cands.some(c => {
+        const cu = c.toUpperCase();
+        const cuBase = c.replace(/^[^:]+:/, '').toUpperCase();
+        return tu === cu || tu === cuBase;
+      });
+      if (!S[pair].tickerA && matchCandidate(cfg.a.candidates)) {
         S[pair].tickerA = t; log(pair, `Auto A: "${t}"`);
       }
-      if (!S[pair].tickerB && cfg.b.candidates.some(c => tu === c.toUpperCase() || tu.includes(c.replace('xyz:','').toUpperCase()))) {
+      if (!S[pair].tickerB && matchCandidate(cfg.b.candidates)) {
         S[pair].tickerB = t; log(pair, `Auto B: "${t}"`);
       }
     }
@@ -821,15 +905,55 @@ function computeVelocity(history, windowSize = 5) {
   const recent = history.slice(-Math.min(windowSize, history.length));
   return recent[recent.length - 1].spread - recent[0].spread;
 }
-function signalStrength(absSpread, threshold, zscore, ztThreshold, velocity) {
+// Referência de funding "meaningful": 0.01%/h = 0.0001 fracionário.
+// Acima disso já é um desequilíbrio relevante pra leitura de crowding.
+const FUNDING_REF = 0.0001;
+function signalStrength(absSpread, threshold, zscore, ztThreshold, velocity, spreadSign, fundingDiff) {
   let score = 0;
-  score += Math.min(absSpread / (threshold * 3), 1) * 40;
-  if (zscore !== null) score += Math.min(Math.abs(zscore) / (ztThreshold * 2), 1) * 40;
+  // Spread magnitude — 35 pts
+  score += Math.min(absSpread / (threshold * 3), 1) * 35;
+  // Z-score — 35 pts
+  if (zscore !== null) score += Math.min(Math.abs(zscore) / (ztThreshold * 2), 1) * 35;
+  // Velocity — 15 pts (continua com desconto quando vai contra o spread)
   if (velocity !== null && absSpread > 0) {
     const velDir = velocity > 0 ? 1 : -1;
-    score += (velDir === 1 ? 1 : 0.3) * Math.min(Math.abs(velocity) / threshold, 1) * 20;
+    score += (velDir === 1 ? 1 : 0.3) * Math.min(Math.abs(velocity) / threshold, 1) * 15;
   }
-  return Math.min(score, 100);
+  // Funding alignment — até 15 pts quando sinal do funding diff confirma o sinal do spread.
+  // fundingDiff = fundingB - fundingA. Se > 0, B tem longs pagando mais (B crowded).
+  // Se spread > 0, B esticou mais. Mesma direção = trade reforçado.
+  if (fundingDiff !== null && spreadSign !== 0) {
+    const aligned = Math.sign(fundingDiff) === spreadSign;
+    const mag = Math.min(Math.abs(fundingDiff) / FUNDING_REF, 1);
+    if (aligned) {
+      score += mag * 15;          // aligned confirma tese
+    } else {
+      score -= mag * 5;           // divergente = pequena penalidade, não zera
+    }
+  }
+  return Math.max(0, Math.min(score, 100));
+}
+
+// Formata funding rate fracionário como porcentagem com sinal
+function fmtFunding(f) {
+  if (f === null || f === undefined || Number.isNaN(f)) return '—';
+  const pct = f * 100;
+  const sign = pct >= 0 ? '+' : '';
+  // 4 casas pra mostrar valores pequenos de funding
+  return sign + pct.toFixed(4) + '%';
+}
+
+// Interpreta o funding diff em linguagem natural pro usuário
+function interpretFundingDiff(fundingDiff, spreadSign, labels) {
+  if (fundingDiff === null || fundingDiff === undefined) return 'aguardando dados';
+  const abs = Math.abs(fundingDiff);
+  if (abs < FUNDING_REF * 0.2) return 'neutro — sem crowding relevante';
+  const crowded = fundingDiff > 0 ? labels[1] : labels[0];
+  if (spreadSign === 0) return `${crowded} mais crowded long`;
+  const aligned = Math.sign(fundingDiff) === spreadSign;
+  return aligned
+    ? `✓ Confirma: ${crowded} crowded + esticado`
+    : `⚠ Divergente — funding não confirma spread`;
 }
 // ══════════════════════════════════════════════════════════════
 // UI UPDATE
@@ -879,7 +1003,10 @@ function updateUI(pair) {
   const velocity = computeVelocity(s.spreadHistory);
   const threshold = parseFloat(document.getElementById(pair + '-threshold').value) || 0.15;
   const ztThreshold = parseFloat(document.getElementById(pair + '-zt').value) || 1.5;
-  const strength = signalStrength(absSpread, threshold, zscore, ztThreshold, velocity);
+  // Funding diff: fundingB - fundingA (mesma convenção do spread = pctB - pctA)
+  const fundingDiff = (s.fundingA !== null && s.fundingB !== null) ? (s.fundingB - s.fundingA) : null;
+  const spreadSign = absSpread < 1e-9 ? 0 : (spread > 0 ? 1 : -1);
+  const strength = signalStrength(absSpread, threshold, zscore, ztThreshold, velocity, spreadSign, fundingDiff);
   const spreadEl = document.getElementById(pair + '-spread');
   spreadEl.textContent = (spread >= 0 ? '+' : '') + spread.toFixed(4) + '%';
   spreadEl.style.color = absSpread >= threshold ? (spread > 0 ? 'var(--green)' : 'var(--red)') : 'var(--text)';
@@ -898,6 +1025,33 @@ function updateUI(pair) {
     vEl.textContent = (velocity >= 0 ? '+' : '') + velocity.toFixed(4) + '%';
     vEl.className = 'sig-val ' + (Math.abs(velocity) > threshold * 0.3 ? (velocity > 0 ? 'pos' : 'neg') : 'neu');
   } else { vEl.textContent = '—'; vEl.className = 'sig-val neu'; }
+  // Funding cards — labels, valores individuais e diff
+  const fLblA = document.getElementById(pair + '-funding-lbl-a');
+  const fLblB = document.getElementById(pair + '-funding-lbl-b');
+  if (fLblA) fLblA.textContent = labels[0];
+  if (fLblB) fLblB.textContent = labels[1];
+  const fAEl = document.getElementById(pair + '-funding-a');
+  const fBEl = document.getElementById(pair + '-funding-b');
+  const fDEl = document.getElementById(pair + '-funding-diff');
+  const fRead = document.getElementById(pair + '-funding-reading');
+  if (fAEl) {
+    fAEl.textContent = fmtFunding(s.fundingA);
+    fAEl.className = 'sig-val ' + (s.fundingA === null ? 'neu' : s.fundingA > 0 ? 'pos' : s.fundingA < 0 ? 'neg' : 'neu');
+  }
+  if (fBEl) {
+    fBEl.textContent = fmtFunding(s.fundingB);
+    fBEl.className = 'sig-val ' + (s.fundingB === null ? 'neu' : s.fundingB > 0 ? 'pos' : s.fundingB < 0 ? 'neg' : 'neu');
+  }
+  if (fDEl) {
+    fDEl.textContent = fmtFunding(fundingDiff);
+    // Cor do diff: se alinhado com spread -> verde (confirma), se divergente -> amarelo, senão neutro
+    let diffCls = 'neu';
+    if (fundingDiff !== null && spreadSign !== 0 && Math.abs(fundingDiff) >= FUNDING_REF * 0.2) {
+      diffCls = Math.sign(fundingDiff) === spreadSign ? 'pos' : 'neg';
+    }
+    fDEl.className = 'sig-val ' + diffCls;
+  }
+  if (fRead) fRead.textContent = interpretFundingDiff(fundingDiff, spreadSign, labels);
   const sVal = document.getElementById(pair + '-strength-val');
   const sBar = document.getElementById(pair + '-strength-bar');
   sVal.textContent = Math.round(strength) + '%';
