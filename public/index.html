@@ -237,7 +237,7 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
   <!-- Settings -->
   <div class="settings-bar">
     <label>Atualizar a cada:</label>
-    <input type="number" id="eq-refresh" value="5" min="1" max="60">
+    <input type="number" id="eq-refresh" value="3" min="1" max="60">
     <span style="color:var(--muted);font-size:0.78rem">s</span>
     <label style="margin-left:8px">Threshold spread:</label>
     <input type="number" id="eq-threshold" value="0.15" step="0.01" min="0">
@@ -408,7 +408,7 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
   <!-- Settings -->
   <div class="settings-bar">
     <label>Atualizar a cada:</label>
-    <input type="number" id="oil-refresh" value="5" min="1" max="60">
+    <input type="number" id="oil-refresh" value="3" min="1" max="60">
     <span style="color:var(--muted);font-size:0.78rem">s</span>
     <label style="margin-left:8px">Threshold spread:</label>
     <input type="number" id="oil-threshold" value="0.15" step="0.01" min="0">
@@ -474,9 +474,12 @@ function mkState() {
     fundingHistory: [],                    // [{time, fundingA, fundingB, diff}]
     spreadHistory: [],  // [{time, spread}]
     maxSamples: DEFAULT_MAX_SAMPLES,
-    timer: null, connected: false, discoveryDone: false,
+    timer: null, fundingTimer: null, connected: false, discoveryDone: false,
   };
 }
+// Funding muda lento (é hourly na Hyperliquid). Puxamos num ciclo próprio mais longo
+// pra economizar weight da API e deixar o poll de preço mais rápido.
+const FUNDING_REFRESH_MS = 30_000;
 const S = { eq: mkState(), oil: mkState() };
 let activeTab = 'eq';
 
@@ -782,76 +785,78 @@ async function fetchPrices(pair) {
       }
     }
   } catch(e) { log(pair, 'allMids err: ' + e.message); }
-  // Sempre chama metaAndAssetCtxs — precisamos do funding a cada tick, além de servir como
-  // fallback pra preço quando allMids não bateu com nenhum candidato.
-  // Ativos HIP-3 (prefix "xyz:" por exemplo) estão num builder dex — precisamos passar
-  // o parâmetro `dex` senão a API retorna só o universo core e nada bate.
+  // Fallbacks de candle em PARALELO (antes eram sequenciais). Só dispara pros ativos
+  // que não vieram no allMids — normalmente nenhum, então custo real = 0.
+  const now = Date.now();
+  const fallbacks = [];
+  if (!foundA) {
+    fallbacks.push(apiCandle(cfg.a.coin, now - 120000, now, '1m')
+      .then(d => { if (d && d.length) { S[pair].curA = parseFloat(d[d.length-1].c); foundA = true; } })
+      .catch(() => {}));
+  }
+  if (!foundB) {
+    fallbacks.push(apiCandle(cfg.b.coin, now - 120000, now, '1m')
+      .then(d => { if (d && d.length) { S[pair].curB = parseFloat(d[d.length-1].c); foundB = true; } })
+      .catch(() => {}));
+  }
+  if (fallbacks.length) await Promise.all(fallbacks);
+  S[pair].connected = foundA || foundB;
+  updateUI(pair);
+  updateTitle(pair);
+}
+
+// ══════════════════════════════════════════════════════════════
+// FETCH FUNDING — ciclo separado, mais lento (30s default).
+// Funding é hourly na Hyperliquid, então buscar a cada tick de preço é desperdício
+// de weight. Este fetch roda em paralelo aos polls de preço e só atualiza o state;
+// o próximo render de updateUI pega os valores novos automaticamente.
+// ══════════════════════════════════════════════════════════════
+async function fetchFunding(pair) {
+  const cfg = PAIRS[pair];
+  // Ativos HIP-3 (prefix "xyz:") estão num builder dex — precisa passar o parâmetro `dex`
+  // senão a API retorna só o universo core e nada bate.
   const dexes = new Set();
   [cfg.a.coin, ...cfg.a.candidates, cfg.b.coin, ...cfg.b.candidates].forEach(c => {
     if (c && c.includes(':')) dexes.add(c.split(':')[0]);
   });
-  // Se nenhum candidato tem prefixo, ainda chamamos o universo core (dex vazio/default).
   const dexList = dexes.size > 0 ? [...dexes] : [''];
-  for (const dex of dexList) {
+  // Pra pairs com múltiplos dexes (raro), chama os dexes em paralelo.
+  const promises = dexList.map(async dex => {
     try {
       const body = dex ? { type:'metaAndAssetCtxs', dex } : { type:'metaAndAssetCtxs' };
       const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
-      if (!res.ok) continue;
+      if (!res.ok) return;
       const resp = await res.json();
-      if (!Array.isArray(resp) || resp.length < 2) continue;
+      if (!Array.isArray(resp) || resp.length < 2) return;
       const [meta, ctxs] = resp;
-      if (!meta || !meta.universe) continue;
+      if (!meta || !meta.universe) return;
       const names = meta.universe.map(u => u.name);
       names.forEach((n, i) => {
         const nUp = n.toUpperCase();
-        // Não duplica prefixo: se n já vem como "xyz:CL", mantém. Senão concatena dex.
         const fullName = (dex && !n.includes(':')) ? `${dex}:${n}` : n;
         const fullUp = fullName.toUpperCase();
-        const px = ctxs[i]?.markPx || ctxs[i]?.midPx;
         const fd = ctxs[i]?.funding;
-        // Match SOMENTE por igualdade exata. Match por substring (nUp.includes) causava
-        // falso positivo: "ORCL".includes("CL") === true → ORCL era matched como CL.
+        // Match SOMENTE por igualdade exata — evita "ORCL".includes("CL") → match errado.
         const matchesAny = (candidates) => candidates.some(c => {
           const cu = c.toUpperCase();
           const cuBase = c.replace(/^[^:]+:/, '').toUpperCase();
           return cu === nUp || cu === fullUp || cuBase === nUp;
         });
-        const matchA = matchesAny(cfg.a.candidates);
-        const matchB = matchesAny(cfg.b.candidates);
-        if (matchA) {
-          if (fd !== undefined && fd !== null && fd !== '') {
-            const parsed = parseFloat(fd);
-            if (!Number.isNaN(parsed)) S[pair].fundingA = parsed;
-          }
-          if (!foundA && px) { S[pair].curA = parseFloat(px); S[pair].tickerA = fullName; foundA = true; }
-        }
-        if (matchB) {
-          if (fd !== undefined && fd !== null && fd !== '') {
-            const parsed = parseFloat(fd);
-            if (!Number.isNaN(parsed)) S[pair].fundingB = parsed;
-          }
-          if (!foundB && px) { S[pair].curB = parseFloat(px); S[pair].tickerB = fullName; foundB = true; }
-        }
+        const setIfValid = (target) => {
+          if (fd === undefined || fd === null || fd === '') return;
+          const parsed = parseFloat(fd);
+          if (!Number.isNaN(parsed)) S[pair][target] = parsed;
+        };
+        if (matchesAny(cfg.a.candidates)) setIfValid('fundingA');
+        if (matchesAny(cfg.b.candidates)) setIfValid('fundingB');
       });
-      log(pair, `meta dex="${dex || 'core'}": ${names.length} ativos | fundingA=${S[pair].fundingA} fundingB=${S[pair].fundingB}`);
-    } catch(e) { log(pair, `meta err (dex=${dex}): ${e.message}`); }
-  }
-  const now = Date.now();
-  if (!foundA) {
-    try {
-      const d = await apiCandle(cfg.a.coin, now - 120000, now, '1m');
-      if (d && d.length) { S[pair].curA = parseFloat(d[d.length-1].c); foundA = true; }
-    } catch(e) {}
-  }
-  if (!foundB) {
-    try {
-      const d = await apiCandle(cfg.b.coin, now - 120000, now, '1m');
-      if (d && d.length) { S[pair].curB = parseFloat(d[d.length-1].c); foundB = true; }
-    } catch(e) {}
-  }
-  S[pair].connected = foundA || foundB;
-  updateUI(pair);
-  updateTitle(pair);
+      log(pair, `funding dex="${dex || 'core'}": A=${S[pair].fundingA} B=${S[pair].fundingB}`);
+    } catch(e) { log(pair, `funding err (dex=${dex}): ${e.message}`); }
+  });
+  await Promise.all(promises);
+  // Força re-render pra que os cards de funding + score composto reflitam valores novos
+  // mesmo entre ticks de preço. recordSample=false porque não é um novo tick.
+  updateUI(pair, false);
 }
 // ══════════════════════════════════════════════════════════════
 // DISCOVER
@@ -957,8 +962,10 @@ function interpretFundingDiff(fundingDiff, spreadSign, labels) {
 }
 // ══════════════════════════════════════════════════════════════
 // UI UPDATE
+// recordSample: se true (default), adiciona amostra ao history. Use false quando
+// chamado de fetchFunding (que só atualiza valores em background, sem novo tick).
 // ══════════════════════════════════════════════════════════════
-function updateUI(pair) {
+function updateUI(pair, recordSample = true) {
   const s = S[pair];
   const cfg = PAIRS[pair];
   const pfx = pair === 'eq' ? ['eq-sp','eq-xyz'] : ['oil-b','oil-c'];
@@ -995,9 +1002,12 @@ function updateUI(pair) {
   }
   const spread = pcts[1] - pcts[0];
   const absSpread = Math.abs(spread);
-  // Record history — usa o limite dinâmico definido em s.maxSamples
-  s.spreadHistory.push({ time: new Date(), spread });
-  if (s.spreadHistory.length > s.maxSamples) s.spreadHistory.shift();
+  // Record history apenas em ticks reais de preço (fetchPrices). Quando updateUI é
+  // chamado de fetchFunding, skip — senão dobraríamos a densidade do histórico.
+  if (recordSample) {
+    s.spreadHistory.push({ time: new Date(), spread });
+    if (s.spreadHistory.length > s.maxSamples) s.spreadHistory.shift();
+  }
   const stats = computeStats(s.spreadHistory);
   const zscore = computeZScore(spread, stats);
   const velocity = computeVelocity(s.spreadHistory);
@@ -1242,10 +1252,15 @@ function drawChart(pair) {
 // POLLING
 // ══════════════════════════════════════════════════════════════
 function startPolling(pair) {
+  // Preço — intervalo configurável (default 3s)
   clearInterval(S[pair].timer);
   fetchPrices(pair);
-  const ms = (parseInt(document.getElementById(pair+'-refresh').value) || 5) * 1000;
+  const ms = (parseInt(document.getElementById(pair+'-refresh').value) || 3) * 1000;
   S[pair].timer = setInterval(() => fetchPrices(pair), ms);
+  // Funding — intervalo fixo (30s). Muda lentamente, não precisa tick rápido.
+  clearInterval(S[pair].fundingTimer);
+  fetchFunding(pair);
+  S[pair].fundingTimer = setInterval(() => fetchFunding(pair), FUNDING_REFRESH_MS);
 }
 // ══════════════════════════════════════════════════════════════
 // AUDIO
