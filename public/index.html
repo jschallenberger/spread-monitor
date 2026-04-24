@@ -515,7 +515,7 @@ function updateTitle(pair) {
   const pctB = ((s.curB - s.closeB) / s.closeB) * 100;
   const spread = pctB - pctA;
   const sign = spread >= 0 ? '+' : '';
-  document.title = `${sign}${spread.toFixed(3)}% · hl-analyzer`;
+  document.title = `${sign}${spread.toFixed(3)}%;
 }
 // ══════════════════════════════════════════════════════════════
 // LOG
