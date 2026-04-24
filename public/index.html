@@ -509,7 +509,6 @@ function updateTitle(pair) {
   if (pair !== activeTab) return;
   const s = S[pair];
   if (s.curA == null || s.curB == null || !s.closeA || !s.closeB) {
-    document.title = 'hl-analyzer';
     return;
   }
   const pctA = ((s.curA - s.closeA) / s.closeA) * 100;
