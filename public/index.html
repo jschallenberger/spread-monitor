@@ -120,6 +120,23 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
   <button class="tab-btn" onclick="switchTab('oil')">Brent / CL (WTI)</button>
 </div>
 <!-- ═══════════════════════════════════════════════════ -->
+<!-- TELEGRAM NOTIFICATIONS (global config)              -->
+<!-- ═══════════════════════════════════════════════════ -->
+<details class="tg-panel" style="margin:0 0 14px 0;background:var(--bg-card,#161616);border:1px solid var(--border,#2a2a2a);border-radius:8px;padding:8px 12px">
+  <summary style="cursor:pointer;color:var(--muted);font-size:0.82rem;user-select:none">📨 Notificações Telegram <span id="tg-status-pill" style="font-size:0.72rem;margin-left:8px;color:var(--muted)">desativado</span></summary>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px;font-size:0.82rem">
+    <label>Worker URL:</label>
+    <input type="text" id="tg-url" placeholder="https://spread-monitor-telegram.<conta>.workers.dev" style="flex:1;min-width:260px">
+    <label>Auth (X-Auth):</label>
+    <input type="password" id="tg-auth" placeholder="opcional, recomendado" style="width:140px">
+    <button class="btn" id="tg-test-btn" onclick="testTelegram()" style="padding:4px 12px">Testar</button>
+    <span id="tg-test-result" style="font-size:0.78rem;color:var(--muted)"></span>
+  </div>
+  <div style="font-size:0.72rem;color:var(--muted);margin-top:6px">
+    Setup: deploy o Worker do Cloudflare (ver <code>worker/README.md</code> no repo), cole a URL aqui. Se você configurou <code>SHARED_SECRET</code>, cole no campo Auth. Configurações por par ficam na barra de cada aba.
+  </div>
+</details>
+<!-- ═══════════════════════════════════════════════════ -->
 <!-- TAB EQUITIES                                        -->
 <!-- ═══════════════════════════════════════════════════ -->
 <div class="tab-content active" id="tab-eq">
@@ -248,6 +265,14 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
     <input type="number" id="eq-maxsamples" value="2000" min="100" max="10000" step="100" style="width:80px" onchange="applyMaxSamples('eq')">
     <label style="margin-left:8px">Som:</label>
     <select id="eq-sound"><option value="on">Ligado</option><option value="off">Desligado</option></select>
+    <label style="margin-left:8px">📨 Telegram:</label>
+    <select id="eq-tg-on"><option value="off">Off</option><option value="on">On</option></select>
+    <label style="margin-left:4px">Notif ≥</label>
+    <input type="number" id="eq-tg-threshold" value="0.30" step="0.01" min="0" style="width:70px">
+    <span style="color:var(--muted);font-size:0.78rem">%</span>
+    <label style="margin-left:4px">Cooldown:</label>
+    <input type="number" id="eq-tg-cooldown" value="10" min="1" max="120" style="width:60px">
+    <span style="color:var(--muted);font-size:0.78rem">min</span>
   </div>
   <!-- Chart -->
   <div class="card" style="margin-bottom:14px">
@@ -419,6 +444,14 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
     <input type="number" id="oil-maxsamples" value="2000" min="100" max="10000" step="100" style="width:80px" onchange="applyMaxSamples('oil')">
     <label style="margin-left:8px">Som:</label>
     <select id="oil-sound"><option value="on">Ligado</option><option value="off">Desligado</option></select>
+    <label style="margin-left:8px">📨 Telegram:</label>
+    <select id="oil-tg-on"><option value="off">Off</option><option value="on">On</option></select>
+    <label style="margin-left:4px">Notif ≥</label>
+    <input type="number" id="oil-tg-threshold" value="0.30" step="0.01" min="0" style="width:70px">
+    <span style="color:var(--muted);font-size:0.78rem">%</span>
+    <label style="margin-left:4px">Cooldown:</label>
+    <input type="number" id="oil-tg-cooldown" value="10" min="1" max="120" style="width:60px">
+    <span style="color:var(--muted);font-size:0.78rem">min</span>
   </div>
   <!-- Chart -->
   <div class="card" style="margin-bottom:14px">
@@ -457,11 +490,9 @@ const PAIRS = {
 const _h = window.location.hostname;
 const API = (window.location.protocol === 'file:' || _h === '' || _h === 'localhost' || _h === '127.0.0.1' || _h.startsWith('192.168.'))
   ? 'https://api.hyperliquid.xyz/info'
-  : '/api/hl';
-
+  : 'https://7oasdckyurkvsjea6jnmar3jbu0pnmsf.lambda-url.sa-east-1.on.aws/';
 // Limite padrão de amostras (pode ser alterado pelo campo "Amostras máx" nas configurações)
 const DEFAULT_MAX_SAMPLES = 2000;
-
 // ══════════════════════════════════════════════════════════════
 // STATE — one per pair
 // ══════════════════════════════════════════════════════════════
@@ -475,6 +506,9 @@ function mkState() {
     spreadHistory: [],  // [{time, spread}]
     maxSamples: DEFAULT_MAX_SAMPLES,
     timer: null, fundingTimer: null, connected: false, discoveryDone: false,
+    // Telegram
+    tgLastNotifyAt: 0,                     // ms epoch da última notificação enviada
+    tgLastSpreadSign: 0,                   // último sinal de spread notificado (-1/0/+1)
   };
 }
 // Funding muda lento (é hourly na Hyperliquid). Puxamos num ciclo próprio mais longo
@@ -482,7 +516,126 @@ function mkState() {
 const FUNDING_REFRESH_MS = 30_000;
 const S = { eq: mkState(), oil: mkState() };
 let activeTab = 'eq';
-
+// ══════════════════════════════════════════════════════════════
+// TELEGRAM NOTIFICATIONS — relay via Cloudflare Worker
+// ══════════════════════════════════════════════════════════════
+// Configurações globais ficam em localStorage 'sm_tg' = { url, auth }.
+// Por par: lê do DOM (eq-tg-on, eq-tg-threshold, eq-tg-cooldown).
+// Cooldown evita spam quando o spread fica oscilando ao redor do threshold.
+function getTgConfig() {
+  return {
+    url: (document.getElementById('tg-url').value || '').trim(),
+    auth: (document.getElementById('tg-auth').value || '').trim(),
+  };
+}
+function saveTgConfig() {
+  try {
+    const cfg = getTgConfig();
+    localStorage.setItem('sm_tg', JSON.stringify(cfg));
+    updateTgStatusPill();
+  } catch(e) {}
+}
+function loadTgConfig() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem('sm_tg') || '{}');
+    if (cfg.url) document.getElementById('tg-url').value = cfg.url;
+    if (cfg.auth) document.getElementById('tg-auth').value = cfg.auth;
+  } catch(e) {}
+  updateTgStatusPill();
+}
+function updateTgStatusPill() {
+  const pill = document.getElementById('tg-status-pill');
+  if (!pill) return;
+  const { url } = getTgConfig();
+  const eqOn = document.getElementById('eq-tg-on') && document.getElementById('eq-tg-on').value === 'on';
+  const oilOn = document.getElementById('oil-tg-on') && document.getElementById('oil-tg-on').value === 'on';
+  if (!url) { pill.textContent = 'sem URL'; pill.style.color = 'var(--muted)'; return; }
+  const active = [];
+  if (eqOn) active.push('eq');
+  if (oilOn) active.push('oil');
+  if (active.length === 0) { pill.textContent = 'config OK · pares off'; pill.style.color = 'var(--muted)'; }
+  else { pill.textContent = 'ativo · ' + active.join('+'); pill.style.color = 'var(--green,#10b981)'; }
+}
+async function sendTelegram(text, opts = {}) {
+  const { url, auth } = getTgConfig();
+  if (!url) throw new Error('Worker URL não configurada');
+  const headers = { 'Content-Type': 'application/json' };
+  if (auth) headers['X-Auth'] = auth;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ text, parse_mode: opts.parse_mode || 'HTML' }),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+  return data;
+}
+async function testTelegram() {
+  const btn = document.getElementById('tg-test-btn');
+  const out = document.getElementById('tg-test-result');
+  if (btn) btn.disabled = true;
+  if (out) { out.textContent = 'enviando...'; out.style.color = 'var(--muted)'; }
+  try {
+    saveTgConfig();
+    await sendTelegram('<b>📡 Spread Monitor</b>\nTeste de conexão OK.\n<i>' + new Date().toLocaleString('pt-BR') + '</i>');
+    if (out) { out.textContent = '✓ enviado'; out.style.color = 'var(--green,#10b981)'; }
+  } catch (err) {
+    if (out) { out.textContent = '✗ ' + err.message; out.style.color = 'var(--red,#ef4444)'; }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+// Decide se deve notificar e dispara fire-and-forget. Chamada do updateUI
+// quando recordSample=true (tick real de preço).
+function maybeNotify(pair, ctx) {
+  const onEl = document.getElementById(pair + '-tg-on');
+  if (!onEl || onEl.value !== 'on') return;
+  const { url } = getTgConfig();
+  if (!url) return;
+  const threshold = parseFloat(document.getElementById(pair + '-tg-threshold').value) || 0.30;
+  const cooldownMin = parseInt(document.getElementById(pair + '-tg-cooldown').value) || 10;
+  const cooldownMs = cooldownMin * 60 * 1000;
+  const s = S[pair];
+  const absSpread = Math.abs(ctx.spread);
+  if (absSpread < threshold) return;
+  const now = Date.now();
+  const sign = ctx.spread > 0 ? 1 : -1;
+  // Reset do cooldown se o spread inverteu de sinal (ex: subiu de -0.4% pra +0.4%)
+  // — é informação nova, vale notificar antes do cooldown vencer.
+  const sideFlipped = (s.tgLastSpreadSign !== 0 && sign !== s.tgLastSpreadSign);
+  if (!sideFlipped && (now - s.tgLastNotifyAt) < cooldownMs) return;
+  s.tgLastNotifyAt = now;
+  s.tgLastSpreadSign = sign;
+  const cfg = PAIRS[pair];
+  const arrow = ctx.spread > 0 ? '🟢' : '🔴';
+  const sideText = ctx.spread > 0
+    ? `${cfg.b.label} acima de ${cfg.a.label}`
+    : `${cfg.a.label} acima de ${cfg.b.label}`;
+  const fmtPct = v => (v >= 0 ? '+' : '') + v.toFixed(4) + '%';
+  const fmtFr = v => v === null ? '—' : (v >= 0 ? '+' : '') + (v * 100).toFixed(4) + '%';
+  const lines = [];
+  lines.push(`${arrow} <b>Spread alerta — ${cfg.spreadLabel}</b>`);
+  lines.push(`<b>${(ctx.spread >= 0 ? '+' : '') + ctx.spread.toFixed(4)}%</b> · ${sideText}`);
+  lines.push('');
+  lines.push(`${cfg.a.label}: ${fmtPct(ctx.pctA)}  (${ctx.priceA !== null ? ctx.priceA.toFixed(2) : '—'})`);
+  lines.push(`${cfg.b.label}: ${fmtPct(ctx.pctB)}  (${ctx.priceB !== null ? ctx.priceB.toFixed(2) : '—'})`);
+  lines.push('');
+  if (ctx.zscore !== null && ctx.zscore !== undefined) {
+    lines.push(`Z-score: <b>${(ctx.zscore >= 0 ? '+' : '') + ctx.zscore.toFixed(2)}σ</b>` +
+               (ctx.velocity !== null ? `   ·   Velocity: ${(ctx.velocity >= 0 ? '+' : '') + ctx.velocity.toFixed(4)}%` : ''));
+  }
+  if (ctx.fundingDiff !== null && ctx.fundingDiff !== undefined) {
+    lines.push(`Funding A: ${fmtFr(ctx.fundingA)}  ·  B: ${fmtFr(ctx.fundingB)}  ·  diff: <b>${fmtFr(ctx.fundingDiff)}</b>`);
+  }
+  if (ctx.strength !== null && ctx.strength !== undefined) {
+    lines.push(`Força do sinal: <b>${ctx.strength.toFixed(0)}/100</b>`);
+  }
+  lines.push('');
+  lines.push(`<i>${new Date().toLocaleTimeString('pt-BR')}</i>`);
+  sendTelegram(lines.join('\n')).catch(err => {
+    log(pair, 'Falha Telegram: ' + err.message);
+  });
+}
 // ══════════════════════════════════════════════════════════════
 // APPLY MAX SAMPLES (called when the input changes)
 // ══════════════════════════════════════════════════════════════
@@ -494,7 +647,6 @@ function applyMaxSamples(pair) {
   }
   log(pair, `Amostras máx ajustado para ${S[pair].maxSamples}`);
 }
-
 // ══════════════════════════════════════════════════════════════
 // TABS
 // ══════════════════════════════════════════════════════════════
@@ -509,14 +661,13 @@ function updateTitle(pair) {
   if (pair !== activeTab) return;
   const s = S[pair];
   if (s.curA == null || s.curB == null || !s.closeA || !s.closeB) {
-    document.title = 'hl-analyzer';
     return;
   }
   const pctA = ((s.curA - s.closeA) / s.closeA) * 100;
   const pctB = ((s.curB - s.closeB) / s.closeB) * 100;
   const spread = pctB - pctA;
   const sign = spread >= 0 ? '+' : '';
-  document.title = `${sign}${spread.toFixed(3)}% · hl-analyzer`;
+  document.title = `${sign}${spread.toFixed(3)}%`;
 }
 // ══════════════════════════════════════════════════════════════
 // LOG
@@ -534,6 +685,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('eq-date').value = today;
   document.getElementById('oil-date-a').value = today;
   document.getElementById('oil-date-b').value = today;
+  // Carrega config global do Telegram (URL + auth) e prefs por par
+  loadTgConfig();
   ['eq','oil'].forEach(p => {
     loadState(p);
     try {
@@ -547,10 +700,22 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(p + '-maxsamples').value = saved.maxSamples;
         S[p].maxSamples = saved.maxSamples;
       }
+      // Restaura prefs de Telegram por par
+      if (saved.tgOn) document.getElementById(p + '-tg-on').value = saved.tgOn;
+      if (saved.tgThreshold) document.getElementById(p + '-tg-threshold').value = saved.tgThreshold;
+      if (saved.tgCooldown) document.getElementById(p + '-tg-cooldown').value = saved.tgCooldown;
     } catch(e) {}
     startPolling(p);
     document.getElementById(p + '-refresh').addEventListener('change', () => startPolling(p));
+    // Persistência das prefs de Telegram + atualização do pill de status
+    ['-tg-on','-tg-threshold','-tg-cooldown'].forEach(suf => {
+      const el = document.getElementById(p + suf);
+      if (el) el.addEventListener('change', () => { saveState(p); updateTgStatusPill(); });
+    });
   });
+  // Persistência da config global de Telegram
+  document.getElementById('tg-url').addEventListener('change', saveTgConfig);
+  document.getElementById('tg-auth').addEventListener('change', saveTgConfig);
 });
 function loadState(pair) {
   try {
@@ -573,11 +738,17 @@ function loadState(pair) {
 }
 function saveState(pair) {
   try {
+    const tgOnEl = document.getElementById(pair + '-tg-on');
+    const tgThEl = document.getElementById(pair + '-tg-threshold');
+    const tgCdEl = document.getElementById(pair + '-tg-cooldown');
     const obj = {
       closeA: S[pair].closeA, closeB: S[pair].closeB,
       threshold: document.getElementById(pair + '-threshold').value,
       zt: document.getElementById(pair + '-zt').value,
       maxSamples: S[pair].maxSamples,
+      tgOn: tgOnEl ? tgOnEl.value : 'off',
+      tgThreshold: tgThEl ? tgThEl.value : '0.30',
+      tgCooldown: tgCdEl ? tgCdEl.value : '10',
     };
     if (pair === 'eq') {
       obj.time = document.getElementById('eq-time').value;
@@ -804,7 +975,6 @@ async function fetchPrices(pair) {
   updateUI(pair);
   updateTitle(pair);
 }
-
 // ══════════════════════════════════════════════════════════════
 // FETCH FUNDING — ciclo separado, mais lento (30s default).
 // Funding é hourly na Hyperliquid, então buscar a cada tick de preço é desperdício
@@ -938,7 +1108,6 @@ function signalStrength(absSpread, threshold, zscore, ztThreshold, velocity, spr
   }
   return Math.max(0, Math.min(score, 100));
 }
-
 // Formata funding rate fracionário como porcentagem com sinal
 function fmtFunding(f) {
   if (f === null || f === undefined || Number.isNaN(f)) return '—';
@@ -947,7 +1116,6 @@ function fmtFunding(f) {
   // 4 casas pra mostrar valores pequenos de funding
   return sign + pct.toFixed(4) + '%';
 }
-
 // Interpreta o funding diff em linguagem natural pro usuário
 function interpretFundingDiff(fundingDiff, spreadSign, labels) {
   if (fundingDiff === null || fundingDiff === undefined) return 'aguardando dados';
@@ -1017,6 +1185,17 @@ function updateUI(pair, recordSample = true) {
   const fundingDiff = (s.fundingA !== null && s.fundingB !== null) ? (s.fundingB - s.fundingA) : null;
   const spreadSign = absSpread < 1e-9 ? 0 : (spread > 0 ? 1 : -1);
   const strength = signalStrength(absSpread, threshold, zscore, ztThreshold, velocity, spreadSign, fundingDiff);
+  // Telegram — só dispara em ticks reais de preço (recordSample=true) pra não
+  // mandar duplicado quando fetchFunding também chama updateUI.
+  if (recordSample) {
+    maybeNotify(pair, {
+      spread, pctA: pcts[0], pctB: pcts[1],
+      priceA: prices[0], priceB: prices[1],
+      zscore, velocity, fundingDiff,
+      fundingA: s.fundingA, fundingB: s.fundingB,
+      strength,
+    });
+  }
   const spreadEl = document.getElementById(pair + '-spread');
   spreadEl.textContent = (spread >= 0 ? '+' : '') + spread.toFixed(4) + '%';
   spreadEl.style.color = absSpread >= threshold ? (spread > 0 ? 'var(--green)' : 'var(--red)') : 'var(--text)';
