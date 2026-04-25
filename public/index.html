@@ -457,9 +457,11 @@ const PAIRS = {
 const _h = window.location.hostname;
 const API = (window.location.protocol === 'file:' || _h === '' || _h === 'localhost' || _h === '127.0.0.1' || _h.startsWith('192.168.'))
   ? 'https://api.hyperliquid.xyz/info'
-  : 'https://7oasdckyurkvsjea6jnmar3jbu0pnmsf.lambda-url.sa-east-1.on.aws/';
+  : '/api/hl';
+
 // Limite padrão de amostras (pode ser alterado pelo campo "Amostras máx" nas configurações)
 const DEFAULT_MAX_SAMPLES = 2000;
+
 // ══════════════════════════════════════════════════════════════
 // STATE — one per pair
 // ══════════════════════════════════════════════════════════════
@@ -480,6 +482,7 @@ function mkState() {
 const FUNDING_REFRESH_MS = 30_000;
 const S = { eq: mkState(), oil: mkState() };
 let activeTab = 'eq';
+
 // ══════════════════════════════════════════════════════════════
 // APPLY MAX SAMPLES (called when the input changes)
 // ══════════════════════════════════════════════════════════════
@@ -491,6 +494,7 @@ function applyMaxSamples(pair) {
   }
   log(pair, `Amostras máx ajustado para ${S[pair].maxSamples}`);
 }
+
 // ══════════════════════════════════════════════════════════════
 // TABS
 // ══════════════════════════════════════════════════════════════
@@ -505,13 +509,14 @@ function updateTitle(pair) {
   if (pair !== activeTab) return;
   const s = S[pair];
   if (s.curA == null || s.curB == null || !s.closeA || !s.closeB) {
+    document.title = 'hl-analyzer';
     return;
   }
   const pctA = ((s.curA - s.closeA) / s.closeA) * 100;
   const pctB = ((s.curB - s.closeB) / s.closeB) * 100;
   const spread = pctB - pctA;
   const sign = spread >= 0 ? '+' : '';
-  document.title = `${sign}${spread.toFixed(3)}%`;
+  document.title = `${sign}${spread.toFixed(3)}% · hl-analyzer`;
 }
 // ══════════════════════════════════════════════════════════════
 // LOG
@@ -799,6 +804,7 @@ async function fetchPrices(pair) {
   updateUI(pair);
   updateTitle(pair);
 }
+
 // ══════════════════════════════════════════════════════════════
 // FETCH FUNDING — ciclo separado, mais lento (30s default).
 // Funding é hourly na Hyperliquid, então buscar a cada tick de preço é desperdício
@@ -932,6 +938,7 @@ function signalStrength(absSpread, threshold, zscore, ztThreshold, velocity, spr
   }
   return Math.max(0, Math.min(score, 100));
 }
+
 // Formata funding rate fracionário como porcentagem com sinal
 function fmtFunding(f) {
   if (f === null || f === undefined || Number.isNaN(f)) return '—';
@@ -940,6 +947,7 @@ function fmtFunding(f) {
   // 4 casas pra mostrar valores pequenos de funding
   return sign + pct.toFixed(4) + '%';
 }
+
 // Interpreta o funding diff em linguagem natural pro usuário
 function interpretFundingDiff(fundingDiff, spreadSign, labels) {
   if (fundingDiff === null || fundingDiff === undefined) return 'aguardando dados';
