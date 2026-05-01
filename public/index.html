@@ -13,13 +13,11 @@
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:20px; }
-/* ——— TABS ——— */
 .tab-bar { display:flex; gap:4px; margin-bottom:20px; background:var(--card); padding:4px; border-radius:10px; border:1px solid var(--border); width:fit-content; }
 .tab-btn { padding:8px 20px; border-radius:7px; border:none; background:transparent; color:var(--muted); cursor:pointer; font-size:0.85rem; font-weight:500; transition:all 0.15s; }
 .tab-btn.active { background:var(--border); color:var(--text); }
 .tab-content { display:none; }
 .tab-content.active { display:block; }
-/* ——— LAYOUT ——— */
 h1 { font-size:1.35rem; font-weight:600; margin-bottom:3px; }
 .subtitle { color:var(--muted); font-size:0.82rem; margin-bottom:18px; }
 .status-bar { display:flex; align-items:center; gap:8px; margin-bottom:16px; font-size:0.78rem; color:var(--muted); }
@@ -29,13 +27,11 @@ h1 { font-size:1.35rem; font-weight:600; margin-bottom:3px; }
 @media(max-width:680px){ .grid2{grid-template-columns:1fr;} }
 .card { background:var(--card); border:1px solid var(--border); border-radius:11px; padding:18px; }
 .card-title { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.6px; color:var(--muted); margin-bottom:10px; }
-/* ——— PRICE CARD ——— */
 .price-main { font-size:1.55rem; font-weight:700; font-variant-numeric:tabular-nums; margin-bottom:4px; }
 .price-row { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
 .price-label { color:var(--muted); font-size:0.82rem; }
 .price-val { font-weight:600; font-variant-numeric:tabular-nums; }
 .pos { color:var(--green); } .neg { color:var(--red); } .neu { color:var(--muted); }
-/* ——— CME BAR ——— */
 .cme-bar { background:var(--card); border:1px solid var(--border); border-radius:11px; padding:14px 18px; margin-bottom:14px; display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
 .cme-bar label { font-size:0.78rem; color:var(--muted); }
 .cme-bar input { background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:6px 10px; font-size:0.88rem; }
@@ -48,11 +44,9 @@ h1 { font-size:1.35rem; font-weight:600; margin-bottom:3px; }
 .close-ok { background:rgba(63,185,80,0.15); color:var(--green); }
 .close-load { background:rgba(210,153,34,0.15); color:var(--yellow); }
 .close-err { background:rgba(248,81,73,0.15); color:var(--red); }
-/* ——— SPREAD BIG ——— */
 .spread-card { margin-bottom:14px; }
 .spread-number { font-size:2.4rem; font-weight:800; text-align:center; padding:10px 0 4px; font-variant-numeric:tabular-nums; }
 .spread-detail { text-align:center; color:var(--muted); font-size:0.82rem; margin-bottom:14px; }
-/* ——— TRADE LEGS ——— */
 .legs { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
 .leg { flex:1; min-width:190px; padding:14px; border-radius:10px; text-align:center; }
 .leg-label { font-weight:800; font-size:1.15rem; margin-bottom:8px; }
@@ -63,19 +57,16 @@ h1 { font-size:1.35rem; font-weight:600; margin-bottom:3px; }
 .leg-long { background:rgba(63,185,80,0.1); border:1px solid rgba(63,185,80,0.3); }
 .leg-short { background:rgba(248,81,73,0.1); border:1px solid rgba(248,81,73,0.3); }
 .leg-neutral { background:rgba(139,148,158,0.07); border:1px solid rgba(139,148,158,0.2); }
-/* ——— SIGNAL QUALITY ——— */
 .signal-row { margin-bottom:14px; }
 .signal-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
 .sig-card { background:var(--card); border:1px solid var(--border); border-radius:9px; padding:12px; text-align:center; }
 .sig-label { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin-bottom:6px; }
 .sig-val { font-size:1.15rem; font-weight:700; font-variant-numeric:tabular-nums; }
 .sig-sub { font-size:0.7rem; color:var(--muted); margin-top:3px; }
-/* ——— STRENGTH METER ——— */
 .strength-bar-wrap { margin-top:10px; }
 .strength-label { font-size:0.72rem; color:var(--muted); margin-bottom:4px; display:flex; justify-content:space-between; }
 .strength-track { height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
 .strength-fill { height:100%; border-radius:4px; transition:width 0.4s ease; }
-/* ——— SETTINGS ——— */
 .settings-bar { background:var(--card); border:1px solid var(--border); border-radius:11px; padding:14px 18px; margin-bottom:14px; display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
 .settings-bar label { font-size:0.78rem; color:var(--muted); }
 .settings-bar input, .settings-bar select { background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:5px 9px; font-size:0.82rem; }
@@ -84,16 +75,13 @@ h1 { font-size:1.35rem; font-weight:600; margin-bottom:3px; }
 .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.68rem; font-weight:700; animation:pulse 1.5s infinite; }
 .badge-alert { background:rgba(248,81,73,0.2); color:var(--red); }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
-/* ——— CHART ——— */
 .chart-wrap { height:160px; margin-top:10px; }
 canvas { width:100%!important; }
-/* ——— HISTORY ——— */
 .hist-wrap { max-height:220px; overflow-y:auto; }
 .hist-wrap::-webkit-scrollbar{width:5px} .hist-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 table { width:100%; border-collapse:collapse; font-size:0.79rem; font-variant-numeric:tabular-nums; }
 th { text-align:left; color:var(--muted); font-weight:500; padding:7px 9px; border-bottom:1px solid var(--border); font-size:0.7rem; text-transform:uppercase; }
 td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
-/* ——— P&L CALC ——— */
 .pnl-row { background:rgba(88,166,255,0.05); border:1px solid rgba(88,166,255,0.15); border-radius:9px; padding:12px 14px; margin-top:12px; }
 .pnl-title { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--blue); font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
 .pnl-title span { font-size:0.65rem; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; }
@@ -107,7 +95,6 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
 .pnl-item { background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:8px 10px; text-align:center; }
 .pnl-item-lbl { font-size:0.66rem; text-transform:uppercase; letter-spacing:0.4px; color:var(--muted); margin-bottom:4px; }
 .pnl-item-val { font-size:0.97rem; font-weight:700; font-variant-numeric:tabular-nums; }
-/* ——— DEBUG ——— */
 .debug-box { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:9px; font-family:monospace; font-size:0.7rem; color:var(--yellow); max-height:100px; overflow-y:auto; margin-top:8px; white-space:pre-wrap; }
 .footer { margin-top:16px; text-align:center; color:var(--muted); font-size:0.68rem; }
 </style>
@@ -119,9 +106,7 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
   <button class="tab-btn active" onclick="switchTab('eq')">SP500 / XYZ100</button>
   <button class="tab-btn" onclick="switchTab('oil')">Brent / CL (WTI)</button>
 </div>
-<!-- ═══════════════════════════════════════════════════ -->
-<!-- TELEGRAM NOTIFICATIONS (global config)              -->
-<!-- ═══════════════════════════════════════════════════ -->
+
 <details class="tg-panel" style="margin:0 0 14px 0;background:var(--bg-card,#161616);border:1px solid var(--border,#2a2a2a);border-radius:8px;padding:8px 12px">
   <summary style="cursor:pointer;color:var(--muted);font-size:0.82rem;user-select:none">📨 Notificações Telegram <span id="tg-status-pill" style="font-size:0.72rem;margin-left:8px;color:var(--muted)">desativado</span></summary>
   <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px;font-size:0.82rem">
@@ -136,9 +121,7 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
     Setup: deploy o Worker do Cloudflare (ver <code>worker/README.md</code> no repo), cole a URL aqui. Se você configurou <code>SHARED_SECRET</code>, cole no campo Auth. Configurações por par ficam na barra de cada aba.
   </div>
 </details>
-<!-- ═══════════════════════════════════════════════════ -->
-<!-- TAB EQUITIES                                        -->
-<!-- ═══════════════════════════════════════════════════ -->
+
 <div class="tab-content active" id="tab-eq">
   <div class="status-bar">
     <div class="dot" id="eq-dot"></div>
@@ -166,7 +149,6 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
       <div class="price-row"><span class="price-label">Variação</span><span class="price-val neu" id="eq-xyz-pct">—</span></div>
     </div>
   </div>
-  <!-- Spread + legs -->
   <div class="card spread-card">
     <div class="card-title">Spread · XYZ100% − SP500%</div>
     <div class="spread-number" id="eq-spread">—</div>
@@ -177,7 +159,6 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
         <div class="leg-desc">Busque o fechamento CME para ver o sinal</div>
       </div>
     </div>
-    <!-- P&L Calculator -->
     <div class="pnl-row">
       <div class="pnl-title">P&amp;L se spread → 0 <span>(esticado corrige · lagging fica parado)</span></div>
       <div class="pnl-inputs">
@@ -198,7 +179,6 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
       </div>
     </div>
   </div>
-  <!-- Funding Rates (Hyperliquid) -->
   <div class="signal-row">
     <div class="signal-grid">
       <div class="sig-card">
@@ -218,7 +198,6 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
       </div>
     </div>
   </div>
-  <!-- Signal quality -->
   <div class="signal-row">
     <div class="signal-grid">
       <div class="sig-card">
@@ -251,7 +230,6 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
       </div>
     </div>
   </div>
-  <!-- Settings -->
   <div class="settings-bar">
     <label>Atualizar a cada:</label>
     <input type="number" id="eq-refresh" value="3" min="1" max="60">
@@ -274,12 +252,10 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
     <input type="number" id="eq-tg-cooldown" value="10" min="1" max="120" style="width:60px">
     <span style="color:var(--muted);font-size:0.78rem">min</span>
   </div>
-  <!-- Chart -->
   <div class="card" style="margin-bottom:14px">
     <div class="card-title">Histórico do Spread</div>
     <div class="chart-wrap"><canvas id="eq-chart"></canvas></div>
   </div>
-  <!-- History -->
   <div class="card" style="margin-bottom:14px">
     <div class="card-title">Log</div>
     <div class="hist-wrap">
@@ -289,9 +265,7 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
   </div>
   <div class="card"><div class="card-title">Debug</div><div class="debug-box" id="eq-debug">—</div></div>
 </div>
-<!-- ═══════════════════════════════════════════════════ -->
-<!-- TAB OIL                                             -->
-<!-- ═══════════════════════════════════════════════════ -->
+
 <div class="tab-content" id="tab-oil">
   <div class="status-bar">
     <div class="dot" id="oil-dot"></div>
@@ -299,7 +273,6 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
     <span style="margin-left:auto" id="oil-updated">—</span>
   </div>
   <div class="grid2" style="margin-bottom:14px">
-    <!-- Brent close bar -->
     <div class="cme-bar" style="flex-direction:column;align-items:flex-start;gap:8px">
       <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted)">Brent (ICE) — Fechamento</div>
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
@@ -309,7 +282,6 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
         <span id="oil-close-status-a" class="close-tag" style="display:none"></span>
       </div>
     </div>
-    <!-- WTI close bar -->
     <div class="cme-bar" style="flex-direction:column;align-items:flex-start;gap:8px">
       <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted)">WTI/CL (NYMEX) — Fechamento</div>
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
@@ -336,7 +308,6 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
       <div style="font-size:0.7rem;color:var(--muted);margin-top:4px" id="oil-c-closetime">—</div>
     </div>
   </div>
-  <!-- Spread + legs -->
   <div class="card spread-card">
     <div class="card-title">Spread · BRENT% − CL%</div>
     <div class="spread-number" id="oil-spread">—</div>
@@ -347,7 +318,6 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
         <div class="leg-desc">Busque o fechamento CME para ver o sinal</div>
       </div>
     </div>
-    <!-- P&L Calculator -->
     <div class="pnl-row">
       <div class="pnl-title">P&amp;L se spread → 0 <span>(esticado corrige · lagging fica parado)</span></div>
       <div class="pnl-inputs">
@@ -368,7 +338,6 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
       </div>
     </div>
   </div>
-  <!-- Funding Rates (Hyperliquid) -->
   <div class="signal-row">
     <div class="signal-grid">
       <div class="sig-card">
@@ -388,7 +357,6 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
       </div>
     </div>
   </div>
-  <!-- Signal quality -->
   <div class="signal-row">
     <div class="signal-grid">
       <div class="sig-card">
@@ -421,7 +389,6 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
       </div>
     </div>
   </div>
-  <!-- Note about Brent/CL -->
   <div class="card" style="margin-bottom:14px;padding:12px 16px">
     <div class="card-title">Nota — Brent / WTI</div>
     <div style="font-size:0.8rem;color:var(--muted);line-height:1.6">
@@ -430,7 +397,6 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
       Diferente do par SP500/XYZ100, o spread Brent/CL tem componente fundamental, então spreads extremos devem ser avaliados com mais cautela.
     </div>
   </div>
-  <!-- Settings -->
   <div class="settings-bar">
     <label>Atualizar a cada:</label>
     <input type="number" id="oil-refresh" value="3" min="1" max="60">
@@ -453,12 +419,10 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
     <input type="number" id="oil-tg-cooldown" value="10" min="1" max="120" style="width:60px">
     <span style="color:var(--muted);font-size:0.78rem">min</span>
   </div>
-  <!-- Chart -->
   <div class="card" style="margin-bottom:14px">
     <div class="card-title">Histórico do Spread</div>
     <div class="chart-wrap"><canvas id="oil-chart"></canvas></div>
   </div>
-  <!-- History -->
   <div class="card" style="margin-bottom:14px">
     <div class="card-title">Log</div>
     <div class="hist-wrap">
@@ -471,7 +435,7 @@ td { padding:5px 9px; border-bottom:1px solid rgba(48,54,61,0.45); }
 <div class="footer">Preços via API pública Hyperliquid (api.hyperliquid.xyz) · Apenas informativo</div>
 <script>
 // ══════════════════════════════════════════════════════════════
-// CONFIG — pair definitions
+// CONFIG
 // ══════════════════════════════════════════════════════════════
 const PAIRS = {
   eq: {
@@ -485,43 +449,73 @@ const PAIRS = {
     spreadLabel: 'BRENT% − CL%',
   },
 };
-// Usa o proxy /api/hl apenas quando hospedado no Vercel (domínio vercel.app ou personalizado).
-// Para uso local (file://, localhost, 127.0.0.1) chama a API da Hyperliquid diretamente.
 const _h = window.location.hostname;
 const API = (window.location.protocol === 'file:' || _h === '' || _h === 'localhost' || _h === '127.0.0.1' || _h.startsWith('192.168.'))
   ? 'https://api.hyperliquid.xyz/info'
   : 'https://7oasdckyurkvsjea6jnmar3jbu0pnmsf.lambda-url.sa-east-1.on.aws/';
-// Limite padrão de amostras (pode ser alterado pelo campo "Amostras máx" nas configurações)
 const DEFAULT_MAX_SAMPLES = 2000;
+
 // ══════════════════════════════════════════════════════════════
-// STATE — one per pair
+// STATE
 // ══════════════════════════════════════════════════════════════
 function mkState() {
   return {
     closeA: null, closeB: null,
     curA: null,   curB: null,
     tickerA: null, tickerB: null,
-    fundingA: null, fundingB: null,       // funding rate atual (hora) — fracionário (0.0001 = 0.01%/h)
-    fundingHistory: [],                    // [{time, fundingA, fundingB, diff}]
-    spreadHistory: [],  // [{time, spread}]
+    fundingA: null, fundingB: null,
+    fundingHistory: [],
+    spreadHistory: [],
     maxSamples: DEFAULT_MAX_SAMPLES,
-    timer: null, fundingTimer: null, connected: false, discoveryDone: false,
-    // Telegram
-    tgLastNotifyAt: 0,                     // ms epoch da última notificação enviada
-    tgLastSpreadSign: 0,                   // último sinal de spread notificado (-1/0/+1)
+    connected: false,
+    tgLastNotifyAt: 0,
+    tgLastSpreadSign: 0,
   };
 }
-// Funding muda lento (é hourly na Hyperliquid). Puxamos num ciclo próprio mais longo
-// pra economizar weight da API e deixar o poll de preço mais rápido.
 const FUNDING_REFRESH_MS = 30_000;
 const S = { eq: mkState(), oil: mkState() };
 let activeTab = 'eq';
+
 // ══════════════════════════════════════════════════════════════
-// TELEGRAM NOTIFICATIONS — relay via Cloudflare Worker
+// WEB WORKER — mantém polling rodando mesmo com a aba em background
+// ----------------------------------------------------------------
+// Toda a parte de fetch periódico (allMids, funding) foi movida para
+// spread-worker.js. O worker roda em thread separada e não sofre o
+// throttling de timers que o Chrome aplica em abas em segundo plano
+// (que limita setInterval a 1× por minuto).
 // ══════════════════════════════════════════════════════════════
-// Configurações globais ficam em localStorage 'sm_tg' = { url, auth }.
-// Por par: lê do DOM (eq-tg-on, eq-tg-threshold, eq-tg-cooldown).
-// Cooldown evita spam quando o spread fica oscilando ao redor do threshold.
+const worker = new Worker('spread-worker.js');
+worker.postMessage({ type: 'init', api: API });
+
+worker.onmessage = function (e) {
+  const m = e.data;
+  if (m.type === 'priceTick') {
+    const s = S[m.pair];
+    s.curA = m.data.curA;
+    s.curB = m.data.curB;
+    if (m.data.tickerA) s.tickerA = m.data.tickerA;
+    if (m.data.tickerB) s.tickerB = m.data.tickerB;
+    s.connected = m.data.connected;
+    updateUI(m.pair, true);
+    updateTitle(m.pair);
+  } else if (m.type === 'fundingTick') {
+    const s = S[m.pair];
+    if (m.data.fundingA !== null) s.fundingA = m.data.fundingA;
+    if (m.data.fundingB !== null) s.fundingB = m.data.fundingB;
+    updateUI(m.pair, false);
+  } else if (m.type === 'log') {
+    log(m.pair, m.message);
+  }
+};
+
+worker.onerror = function (err) {
+  console.error('Worker error:', err);
+  log('eq', 'Worker error: ' + err.message);
+};
+
+// ══════════════════════════════════════════════════════════════
+// TELEGRAM
+// ══════════════════════════════════════════════════════════════
 function getTgConfig() {
   return {
     url: (document.getElementById('tg-url').value || '').trim(),
@@ -585,8 +579,6 @@ async function testTelegram() {
     if (btn) btn.disabled = false;
   }
 }
-// Decide se deve notificar e dispara fire-and-forget. Chamada do updateUI
-// quando recordSample=true (tick real de preço).
 function maybeNotify(pair, ctx) {
   const onEl = document.getElementById(pair + '-tg-on');
   if (!onEl || onEl.value !== 'on') return;
@@ -600,8 +592,6 @@ function maybeNotify(pair, ctx) {
   if (absSpread < threshold) return;
   const now = Date.now();
   const sign = ctx.spread > 0 ? 1 : -1;
-  // Reset do cooldown se o spread inverteu de sinal (ex: subiu de -0.4% pra +0.4%)
-  // — é informação nova, vale notificar antes do cooldown vencer.
   const sideFlipped = (s.tgLastSpreadSign !== 0 && sign !== s.tgLastSpreadSign);
   if (!sideFlipped && (now - s.tgLastNotifyAt) < cooldownMs) return;
   s.tgLastNotifyAt = now;
@@ -609,35 +599,36 @@ function maybeNotify(pair, ctx) {
   const cfg = PAIRS[pair];
   const arrow = ctx.spread > 0 ? '🟢' : '🔴';
   const sideText = ctx.spread > 0
-    ? `${cfg.b.label} acima de ${cfg.a.label}`
-    : `${cfg.a.label} acima de ${cfg.b.label}`;
+    ? cfg.b.label + ' acima de ' + cfg.a.label
+    : cfg.a.label + ' acima de ' + cfg.b.label;
   const fmtPct = v => (v >= 0 ? '+' : '') + v.toFixed(4) + '%';
   const fmtFr = v => v === null ? '—' : (v >= 0 ? '+' : '') + (v * 100).toFixed(4) + '%';
   const lines = [];
-  lines.push(`${arrow} <b>Spread alerta — ${cfg.spreadLabel}</b>`);
-  lines.push(`<b>${(ctx.spread >= 0 ? '+' : '') + ctx.spread.toFixed(4)}%</b> · ${sideText}`);
+  lines.push(arrow + ' <b>Spread alerta — ' + cfg.spreadLabel + '</b>');
+  lines.push('<b>' + ((ctx.spread >= 0 ? '+' : '') + ctx.spread.toFixed(4)) + '%</b> · ' + sideText);
   lines.push('');
-  lines.push(`${cfg.a.label}: ${fmtPct(ctx.pctA)}  (${ctx.priceA !== null ? ctx.priceA.toFixed(2) : '—'})`);
-  lines.push(`${cfg.b.label}: ${fmtPct(ctx.pctB)}  (${ctx.priceB !== null ? ctx.priceB.toFixed(2) : '—'})`);
+  lines.push(cfg.a.label + ': ' + fmtPct(ctx.pctA) + '  (' + (ctx.priceA !== null ? ctx.priceA.toFixed(2) : '—') + ')');
+  lines.push(cfg.b.label + ': ' + fmtPct(ctx.pctB) + '  (' + (ctx.priceB !== null ? ctx.priceB.toFixed(2) : '—') + ')');
   lines.push('');
   if (ctx.zscore !== null && ctx.zscore !== undefined) {
-    lines.push(`Z-score: <b>${(ctx.zscore >= 0 ? '+' : '') + ctx.zscore.toFixed(2)}σ</b>` +
-               (ctx.velocity !== null ? `   ·   Velocity: ${(ctx.velocity >= 0 ? '+' : '') + ctx.velocity.toFixed(4)}%` : ''));
+    lines.push('Z-score: <b>' + ((ctx.zscore >= 0 ? '+' : '') + ctx.zscore.toFixed(2)) + 'σ</b>' +
+               (ctx.velocity !== null ? '   ·   Velocity: ' + ((ctx.velocity >= 0 ? '+' : '') + ctx.velocity.toFixed(4)) + '%' : ''));
   }
   if (ctx.fundingDiff !== null && ctx.fundingDiff !== undefined) {
-    lines.push(`Funding A: ${fmtFr(ctx.fundingA)}  ·  B: ${fmtFr(ctx.fundingB)}  ·  diff: <b>${fmtFr(ctx.fundingDiff)}</b>`);
+    lines.push('Funding A: ' + fmtFr(ctx.fundingA) + '  ·  B: ' + fmtFr(ctx.fundingB) + '  ·  diff: <b>' + fmtFr(ctx.fundingDiff) + '</b>');
   }
   if (ctx.strength !== null && ctx.strength !== undefined) {
-    lines.push(`Força do sinal: <b>${ctx.strength.toFixed(0)}/100</b>`);
+    lines.push('Força do sinal: <b>' + ctx.strength.toFixed(0) + '/100</b>');
   }
   lines.push('');
-  lines.push(`<i>${new Date().toLocaleTimeString('pt-BR')}</i>`);
+  lines.push('<i>' + new Date().toLocaleTimeString('pt-BR') + '</i>');
   sendTelegram(lines.join('\n')).catch(err => {
     log(pair, 'Falha Telegram: ' + err.message);
   });
 }
+
 // ══════════════════════════════════════════════════════════════
-// APPLY MAX SAMPLES (called when the input changes)
+// MAX SAMPLES
 // ══════════════════════════════════════════════════════════════
 function applyMaxSamples(pair) {
   const val = parseInt(document.getElementById(pair + '-maxsamples').value) || DEFAULT_MAX_SAMPLES;
@@ -645,14 +636,15 @@ function applyMaxSamples(pair) {
   while (S[pair].spreadHistory.length > S[pair].maxSamples) {
     S[pair].spreadHistory.shift();
   }
-  log(pair, `Amostras máx ajustado para ${S[pair].maxSamples}`);
+  log(pair, 'Amostras máx ajustado para ' + S[pair].maxSamples);
 }
+
 // ══════════════════════════════════════════════════════════════
 // TABS
 // ══════════════════════════════════════════════════════════════
 function switchTab(t) {
   activeTab = t;
-  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['eq','oil'][i] === t));
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', ['eq','oil'][i] === t));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.getElementById('tab-' + t).classList.add('active');
   updateTitle(t);
@@ -660,23 +652,24 @@ function switchTab(t) {
 function updateTitle(pair) {
   if (pair !== activeTab) return;
   const s = S[pair];
-  if (s.curA == null || s.curB == null || !s.closeA || !s.closeB) {
-    return;
-  }
+  if (s.curA == null || s.curB == null || !s.closeA || !s.closeB) return;
   const pctA = ((s.curA - s.closeA) / s.closeA) * 100;
   const pctB = ((s.curB - s.closeB) / s.closeB) * 100;
   const spread = pctB - pctA;
   const sign = spread >= 0 ? '+' : '';
-  document.title = `${sign}${spread.toFixed(3)}%`;
+  document.title = sign + spread.toFixed(3) + '%';
 }
+
 // ══════════════════════════════════════════════════════════════
 // LOG
 // ══════════════════════════════════════════════════════════════
 function log(pair, msg) {
   const el = document.getElementById(pair + '-debug');
+  if (!el) return;
   const ts = new Date().toLocaleTimeString('pt-BR');
-  el.textContent = `[${ts}] ${msg}\n` + el.textContent.slice(0, 3000);
+  el.textContent = '[' + ts + '] ' + msg + '\n' + el.textContent.slice(0, 3000);
 }
+
 // ══════════════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════════════
@@ -685,7 +678,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('eq-date').value = today;
   document.getElementById('oil-date-a').value = today;
   document.getElementById('oil-date-b').value = today;
-  // Carrega config global do Telegram (URL + auth) e prefs por par
   loadTgConfig();
   ['eq','oil'].forEach(p => {
     loadState(p);
@@ -700,23 +692,21 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(p + '-maxsamples').value = saved.maxSamples;
         S[p].maxSamples = saved.maxSamples;
       }
-      // Restaura prefs de Telegram por par
       if (saved.tgOn) document.getElementById(p + '-tg-on').value = saved.tgOn;
       if (saved.tgThreshold) document.getElementById(p + '-tg-threshold').value = saved.tgThreshold;
       if (saved.tgCooldown) document.getElementById(p + '-tg-cooldown').value = saved.tgCooldown;
     } catch(e) {}
     startPolling(p);
     document.getElementById(p + '-refresh').addEventListener('change', () => startPolling(p));
-    // Persistência das prefs de Telegram + atualização do pill de status
     ['-tg-on','-tg-threshold','-tg-cooldown'].forEach(suf => {
       const el = document.getElementById(p + suf);
       if (el) el.addEventListener('change', () => { saveState(p); updateTgStatusPill(); });
     });
   });
-  // Persistência da config global de Telegram
   document.getElementById('tg-url').addEventListener('change', saveTgConfig);
   document.getElementById('tg-auth').addEventListener('change', saveTgConfig);
 });
+
 function loadState(pair) {
   try {
     const s = JSON.parse(localStorage.getItem('sm_' + pair) || '{}');
@@ -773,13 +763,28 @@ function updateCloseLabels(pair) {
     const tb = document.getElementById('oil-time-b').value;
     const da = document.getElementById('oil-date-a').value;
     const db = document.getElementById('oil-date-b').value;
-    if (S[pair].closeA) document.getElementById('oil-b-closetime').textContent = `Ref: ${da} ${ta} BRT (candle ${ta.split(':')[0]}:${String(parseInt(ta.split(':')[1])-1).padStart(2,'0')})`;
-    if (S[pair].closeB) document.getElementById('oil-c-closetime').textContent = `Ref: ${db} ${tb} BRT (candle ${tb.split(':')[0]}:${String(parseInt(tb.split(':')[1])-1).padStart(2,'0')})`;
+    if (S[pair].closeA) document.getElementById('oil-b-closetime').textContent = 'Ref: ' + da + ' ' + ta + ' BRT (candle ' + ta.split(':')[0] + ':' + String(parseInt(ta.split(':')[1]) - 1).padStart(2, '0') + ')';
+    if (S[pair].closeB) document.getElementById('oil-c-closetime').textContent = 'Ref: ' + db + ' ' + tb + ' BRT (candle ' + tb.split(':')[0] + ':' + String(parseInt(tb.split(':')[1]) - 1).padStart(2, '0') + ')';
   }
 }
+
 // ══════════════════════════════════════════════════════════════
-// FETCH CLOSE (candleSnapshot)
+// FETCH CLOSE — disparado por clique do usuário, fica na main thread
 // ══════════════════════════════════════════════════════════════
+async function apiCandle(coin, startMs, endMs, interval = '1m') {
+  const res = await fetch(API, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ type:'candleSnapshot', req:{ coin, interval, startTime:startMs, endTime:endMs } })
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return await res.json();
+}
+function pickCandle(candles, targetOpenMs) {
+  const sorted = [...candles].sort((a,b) => a.t - b.t);
+  let best = null;
+  for (const c of sorted) { if (c.t <= targetOpenMs) best = c; }
+  return best || sorted[sorted.length - 1];
+}
 async function fetchClose(pair) {
   const btn = document.getElementById(pair + '-btn');
   const statusEl = document.getElementById(pair + '-close-status');
@@ -795,39 +800,39 @@ async function fetchClose(pair) {
   }
   const [h, m] = timeStr.split(':').map(Number);
   const [y, mo, d] = dateStr.split('-').map(Number);
-  const targetOpenMs = new Date(y, mo-1, d, h, m, 0, 0).getTime() - 60000;
+  const targetOpenMs = new Date(y, mo - 1, d, h, m, 0, 0).getTime() - 60000;
   const win = 8 * 60000;
   const cfg = PAIRS[pair];
   let closeA = null, closeB = null, errs = [];
-  log(pair, `API: ${API} | alvo: ${new Date(targetOpenMs).toLocaleString('pt-BR')}`);
+  log(pair, 'API: ' + API + ' | alvo: ' + new Date(targetOpenMs).toLocaleString('pt-BR'));
   for (const [key, coin, candidates] of [['A', cfg.a.coin, cfg.a.candidates], ['B', cfg.b.coin, cfg.b.candidates]]) {
     const label = cfg[key === 'A' ? 'a' : 'b'].label;
     let found = null;
     for (const c of [coin, ...candidates]) {
       try {
-        log(pair, `[${label}] Tentando 1m coin="${c}"...`);
+        log(pair, '[' + label + '] Tentando 1m coin="' + c + '"...');
         const data = await apiCandle(c, targetOpenMs - win, targetOpenMs + win, '1m');
-        log(pair, `[${label}] 1m "${c}": ${data ? data.length : 'null'} candles`);
+        log(pair, '[' + label + '] 1m "' + c + '": ' + (data ? data.length : 'null') + ' candles');
         if (data && data.length > 0) {
           const candle = pickCandle(data, targetOpenMs);
           found = parseFloat(candle.c);
-          log(pair, `[${label}] OK — candle ${new Date(candle.t).toLocaleTimeString('pt-BR')} close=${candle.c}`);
+          log(pair, '[' + label + '] OK — candle ' + new Date(candle.t).toLocaleTimeString('pt-BR') + ' close=' + candle.c);
           break;
         }
-      } catch(e) { log(pair, `[${label}] ERRO 1m "${c}": ${e.message}`); }
+      } catch(e) { log(pair, '[' + label + '] ERRO 1m "' + c + '": ' + e.message); }
     }
     if (found === null) {
-      log(pair, `[${label}] Tentando fallback 5m...`);
+      log(pair, '[' + label + '] Tentando fallback 5m...');
       for (const c of [coin, ...candidates]) {
         try {
-          const data = await apiCandle(c, targetOpenMs - 30*60000, targetOpenMs + 30*60000, '5m');
-          log(pair, `[${label}] 5m "${c}": ${data ? data.length : 'null'} candles`);
+          const data = await apiCandle(c, targetOpenMs - 30 * 60000, targetOpenMs + 30 * 60000, '5m');
+          log(pair, '[' + label + '] 5m "' + c + '": ' + (data ? data.length : 'null') + ' candles');
           if (data && data.length > 0) {
             found = parseFloat(pickCandle(data, targetOpenMs).c);
-            log(pair, `[${label}] OK 5m — close=${found}`);
+            log(pair, '[' + label + '] OK 5m — close=' + found);
             break;
           }
-        } catch(e) { log(pair, `[${label}] ERRO 5m "${c}": ${e.message}`); }
+        } catch(e) { log(pair, '[' + label + '] ERRO 5m "' + c + '": ' + e.message); }
       }
     }
     if (found === null) errs.push(label);
@@ -840,7 +845,7 @@ async function fetchClose(pair) {
   saveState(pair);
   clearHistory(pair);
   if (closeA !== null && closeB !== null) {
-    statusEl.textContent = `${cfg.a.label}: ${closeA.toFixed(2)}  |  ${cfg.b.label}: ${closeB.toFixed(2)}`;
+    statusEl.textContent = cfg.a.label + ': ' + closeA.toFixed(2) + '  |  ' + cfg.b.label + ': ' + closeB.toFixed(2);
     statusEl.className = 'close-tag close-ok';
   } else if (errs.length < 2) {
     statusEl.textContent = 'Parcial — sem candle: ' + errs.join(', ');
@@ -848,16 +853,14 @@ async function fetchClose(pair) {
   } else {
     statusEl.textContent = 'Erro: ' + errs.join(', ') + ' — ver debug';
     statusEl.className = 'close-tag close-err';
-    log(pair, 'Rodando discovery...');
-    await discover(pair);
   }
   btn.disabled = false; btn.textContent = 'Buscar fechamento';
 }
 async function fetchCloseOne(pair, leg) {
-  const timeId = `${pair}-time-${leg}`;
-  const dateId = `${pair}-date-${leg}`;
-  const btnId  = `${pair}-btn-${leg}`;
-  const statId = `${pair}-close-status-${leg}`;
+  const timeId = pair + '-time-' + leg;
+  const dateId = pair + '-date-' + leg;
+  const btnId  = pair + '-btn-' + leg;
+  const statId = pair + '-close-status-' + leg;
   const cfg    = PAIRS[pair];
   const asset  = leg === 'a' ? cfg.a : cfg.b;
   const btn = document.getElementById(btnId);
@@ -874,39 +877,39 @@ async function fetchCloseOne(pair, leg) {
   }
   const [h, m] = timeStr.split(':').map(Number);
   const [y, mo, d] = dateStr.split('-').map(Number);
-  const targetOpenMs = new Date(y, mo-1, d, h, m, 0, 0).getTime() - 60000;
+  const targetOpenMs = new Date(y, mo - 1, d, h, m, 0, 0).getTime() - 60000;
   const win = 8 * 60000;
-  log(pair, `[${asset.label}] Buscando candle 1m — alvo: ${new Date(targetOpenMs).toLocaleString('pt-BR')}`);
+  log(pair, '[' + asset.label + '] Buscando candle 1m — alvo: ' + new Date(targetOpenMs).toLocaleString('pt-BR'));
   let found = null;
   for (const c of [asset.coin, ...asset.candidates]) {
     try {
-      log(pair, `[${asset.label}] Tentando 1m coin="${c}"...`);
+      log(pair, '[' + asset.label + '] Tentando 1m coin="' + c + '"...');
       const data = await apiCandle(c, targetOpenMs - win, targetOpenMs + win, '1m');
-      log(pair, `[${asset.label}] Resposta 1m: ${data ? data.length : 'null'} candles`);
+      log(pair, '[' + asset.label + '] Resposta 1m: ' + (data ? data.length : 'null') + ' candles');
       if (data && data.length > 0) {
         const candle = pickCandle(data, targetOpenMs);
         found = parseFloat(candle.c);
-        log(pair, `[${asset.label}] OK — candle ${new Date(candle.t).toLocaleTimeString('pt-BR')} close=${candle.c}`);
+        log(pair, '[' + asset.label + '] OK — candle ' + new Date(candle.t).toLocaleTimeString('pt-BR') + ' close=' + candle.c);
         break;
       }
-    } catch(e) { log(pair, `[${asset.label}] ERRO 1m "${c}": ${e.message}`); }
+    } catch(e) { log(pair, '[' + asset.label + '] ERRO 1m "' + c + '": ' + e.message); }
   }
   if (found === null) {
-    log(pair, `[${asset.label}] Tentando fallback 5m...`);
+    log(pair, '[' + asset.label + '] Tentando fallback 5m...');
     for (const c of [asset.coin, ...asset.candidates]) {
       try {
-        const data = await apiCandle(c, targetOpenMs - 30*60000, targetOpenMs + 30*60000, '5m');
+        const data = await apiCandle(c, targetOpenMs - 30 * 60000, targetOpenMs + 30 * 60000, '5m');
         if (data && data.length > 0) {
           found = parseFloat(pickCandle(data, targetOpenMs).c);
-          log(pair, `[${asset.label}] OK 5m — close=${found}`);
+          log(pair, '[' + asset.label + '] OK 5m — close=' + found);
           break;
         }
-      } catch(e) { log(pair, `[${asset.label}] ERRO 5m "${c}": ${e.message}`); }
+      } catch(e) { log(pair, '[' + asset.label + '] ERRO 5m "' + c + '": ' + e.message); }
     }
   }
   if (found !== null) {
     if (leg === 'a') S[pair].closeA = found; else S[pair].closeB = found;
-    statusEl.textContent = `${asset.label}: ${found.toFixed(2)}`;
+    statusEl.textContent = asset.label + ': ' + found.toFixed(2);
     statusEl.className = 'close-tag close-ok';
   } else {
     statusEl.textContent = 'Sem candle — ver debug';
@@ -918,145 +921,7 @@ async function fetchCloseOne(pair, leg) {
   clearHistory(pair);
   btn.disabled = false; btn.textContent = 'Buscar';
 }
-function pickCandle(candles, targetOpenMs) {
-  const sorted = [...candles].sort((a,b) => a.t - b.t);
-  let best = null;
-  for (const c of sorted) { if (c.t <= targetOpenMs) best = c; }
-  return best || sorted[sorted.length - 1];
-}
-async function apiCandle(coin, startMs, endMs, interval='1m') {
-  const res = await fetch(API, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ type:'candleSnapshot', req:{ coin, interval, startTime:startMs, endTime:endMs } })
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return await res.json();
-}
-// ══════════════════════════════════════════════════════════════
-// FETCH CURRENT PRICES (3-strategy cascade)
-// ══════════════════════════════════════════════════════════════
-async function fetchPrices(pair) {
-  const cfg = PAIRS[pair];
-  let foundA = false, foundB = false;
-  try {
-    const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({type:'allMids'}) });
-    if (res.ok) {
-      const mids = await res.json();
-      for (const c of [cfg.a.coin, ...cfg.a.candidates]) {
-        if (mids[c] !== undefined) { S[pair].curA = parseFloat(mids[c]); S[pair].tickerA = c; foundA = true; break; }
-      }
-      for (const c of [cfg.b.coin, ...cfg.b.candidates]) {
-        if (mids[c] !== undefined) { S[pair].curB = parseFloat(mids[c]); S[pair].tickerB = c; foundB = true; break; }
-      }
-      if ((!foundA || !foundB) && !S[pair].discoveryDone) {
-        S[pair].discoveryDone = true;
-        await discover(pair);
-        if (S[pair].tickerA && mids[S[pair].tickerA]) { S[pair].curA = parseFloat(mids[S[pair].tickerA]); foundA = true; }
-        if (S[pair].tickerB && mids[S[pair].tickerB]) { S[pair].curB = parseFloat(mids[S[pair].tickerB]); foundB = true; }
-      }
-    }
-  } catch(e) { log(pair, 'allMids err: ' + e.message); }
-  // Fallbacks de candle em PARALELO (antes eram sequenciais). Só dispara pros ativos
-  // que não vieram no allMids — normalmente nenhum, então custo real = 0.
-  const now = Date.now();
-  const fallbacks = [];
-  if (!foundA) {
-    fallbacks.push(apiCandle(cfg.a.coin, now - 120000, now, '1m')
-      .then(d => { if (d && d.length) { S[pair].curA = parseFloat(d[d.length-1].c); foundA = true; } })
-      .catch(() => {}));
-  }
-  if (!foundB) {
-    fallbacks.push(apiCandle(cfg.b.coin, now - 120000, now, '1m')
-      .then(d => { if (d && d.length) { S[pair].curB = parseFloat(d[d.length-1].c); foundB = true; } })
-      .catch(() => {}));
-  }
-  if (fallbacks.length) await Promise.all(fallbacks);
-  S[pair].connected = foundA || foundB;
-  updateUI(pair);
-  updateTitle(pair);
-}
-// ══════════════════════════════════════════════════════════════
-// FETCH FUNDING — ciclo separado, mais lento (30s default).
-// Funding é hourly na Hyperliquid, então buscar a cada tick de preço é desperdício
-// de weight. Este fetch roda em paralelo aos polls de preço e só atualiza o state;
-// o próximo render de updateUI pega os valores novos automaticamente.
-// ══════════════════════════════════════════════════════════════
-async function fetchFunding(pair) {
-  const cfg = PAIRS[pair];
-  // Ativos HIP-3 (prefix "xyz:") estão num builder dex — precisa passar o parâmetro `dex`
-  // senão a API retorna só o universo core e nada bate.
-  const dexes = new Set();
-  [cfg.a.coin, ...cfg.a.candidates, cfg.b.coin, ...cfg.b.candidates].forEach(c => {
-    if (c && c.includes(':')) dexes.add(c.split(':')[0]);
-  });
-  const dexList = dexes.size > 0 ? [...dexes] : [''];
-  // Pra pairs com múltiplos dexes (raro), chama os dexes em paralelo.
-  const promises = dexList.map(async dex => {
-    try {
-      const body = dex ? { type:'metaAndAssetCtxs', dex } : { type:'metaAndAssetCtxs' };
-      const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
-      if (!res.ok) return;
-      const resp = await res.json();
-      if (!Array.isArray(resp) || resp.length < 2) return;
-      const [meta, ctxs] = resp;
-      if (!meta || !meta.universe) return;
-      const names = meta.universe.map(u => u.name);
-      names.forEach((n, i) => {
-        const nUp = n.toUpperCase();
-        const fullName = (dex && !n.includes(':')) ? `${dex}:${n}` : n;
-        const fullUp = fullName.toUpperCase();
-        const fd = ctxs[i]?.funding;
-        // Match SOMENTE por igualdade exata — evita "ORCL".includes("CL") → match errado.
-        const matchesAny = (candidates) => candidates.some(c => {
-          const cu = c.toUpperCase();
-          const cuBase = c.replace(/^[^:]+:/, '').toUpperCase();
-          return cu === nUp || cu === fullUp || cuBase === nUp;
-        });
-        const setIfValid = (target) => {
-          if (fd === undefined || fd === null || fd === '') return;
-          const parsed = parseFloat(fd);
-          if (!Number.isNaN(parsed)) S[pair][target] = parsed;
-        };
-        if (matchesAny(cfg.a.candidates)) setIfValid('fundingA');
-        if (matchesAny(cfg.b.candidates)) setIfValid('fundingB');
-      });
-      log(pair, `funding dex="${dex || 'core'}": A=${S[pair].fundingA} B=${S[pair].fundingB}`);
-    } catch(e) { log(pair, `funding err (dex=${dex}): ${e.message}`); }
-  });
-  await Promise.all(promises);
-  // Força re-render pra que os cards de funding + score composto reflitam valores novos
-  // mesmo entre ticks de preço. recordSample=false porque não é um novo tick.
-  updateUI(pair, false);
-}
-// ══════════════════════════════════════════════════════════════
-// DISCOVER
-// ══════════════════════════════════════════════════════════════
-async function discover(pair) {
-  try {
-    const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({type:'allMids'}) });
-    const mids = await res.json();
-    const all = Object.keys(mids);
-    const hip3 = all.filter(t => t.includes(':'));
-    log(pair, `Discovery — HIP-3 tickers: ${hip3.join(', ')}`);
-    const cfg = PAIRS[pair];
-    for (const t of all) {
-      const tu = t.toUpperCase();
-      // Match estrito: igualdade exata OU igual ao candidato sem prefixo dex.
-      // NÃO usar substring — "ORCL" bate em "CL" e causa match errado.
-      const matchCandidate = (cands) => cands.some(c => {
-        const cu = c.toUpperCase();
-        const cuBase = c.replace(/^[^:]+:/, '').toUpperCase();
-        return tu === cu || tu === cuBase;
-      });
-      if (!S[pair].tickerA && matchCandidate(cfg.a.candidates)) {
-        S[pair].tickerA = t; log(pair, `Auto A: "${t}"`);
-      }
-      if (!S[pair].tickerB && matchCandidate(cfg.b.candidates)) {
-        S[pair].tickerB = t; log(pair, `Auto B: "${t}"`);
-      }
-    }
-  } catch(e) { log(pair, 'discover err: ' + e.message); }
-}
+
 // ══════════════════════════════════════════════════════════════
 // SPREAD ANALYTICS
 // ══════════════════════════════════════════════════════════════
@@ -1064,8 +929,8 @@ function computeStats(history) {
   if (history.length === 0) return null;
   const spreads = history.map(h => h.spread);
   const n = spreads.length;
-  const mean = spreads.reduce((a,b) => a+b, 0) / n;
-  const variance = spreads.reduce((a,b) => a + (b-mean)**2, 0) / Math.max(n-1, 1);
+  const mean = spreads.reduce((a, b) => a + b, 0) / n;
+  const variance = spreads.reduce((a, b) => a + (b - mean) ** 2, 0) / Math.max(n - 1, 1);
   const std = Math.sqrt(variance);
   const max = Math.max(...spreads);
   const min = Math.min(...spreads);
@@ -1080,58 +945,43 @@ function computeVelocity(history, windowSize = 5) {
   const recent = history.slice(-Math.min(windowSize, history.length));
   return recent[recent.length - 1].spread - recent[0].spread;
 }
-// Referência de funding "meaningful": 0.01%/h = 0.0001 fracionário.
-// Acima disso já é um desequilíbrio relevante pra leitura de crowding.
 const FUNDING_REF = 0.0001;
 function signalStrength(absSpread, threshold, zscore, ztThreshold, velocity, spreadSign, fundingDiff) {
   let score = 0;
-  // Spread magnitude — 35 pts
   score += Math.min(absSpread / (threshold * 3), 1) * 35;
-  // Z-score — 35 pts
   if (zscore !== null) score += Math.min(Math.abs(zscore) / (ztThreshold * 2), 1) * 35;
-  // Velocity — 15 pts (continua com desconto quando vai contra o spread)
   if (velocity !== null && absSpread > 0) {
     const velDir = velocity > 0 ? 1 : -1;
     score += (velDir === 1 ? 1 : 0.3) * Math.min(Math.abs(velocity) / threshold, 1) * 15;
   }
-  // Funding alignment — até 15 pts quando sinal do funding diff confirma o sinal do spread.
-  // fundingDiff = fundingB - fundingA. Se > 0, B tem longs pagando mais (B crowded).
-  // Se spread > 0, B esticou mais. Mesma direção = trade reforçado.
   if (fundingDiff !== null && spreadSign !== 0) {
     const aligned = Math.sign(fundingDiff) === spreadSign;
     const mag = Math.min(Math.abs(fundingDiff) / FUNDING_REF, 1);
-    if (aligned) {
-      score += mag * 15;          // aligned confirma tese
-    } else {
-      score -= mag * 5;           // divergente = pequena penalidade, não zera
-    }
+    if (aligned) score += mag * 15;
+    else score -= mag * 5;
   }
   return Math.max(0, Math.min(score, 100));
 }
-// Formata funding rate fracionário como porcentagem com sinal
 function fmtFunding(f) {
   if (f === null || f === undefined || Number.isNaN(f)) return '—';
   const pct = f * 100;
   const sign = pct >= 0 ? '+' : '';
-  // 4 casas pra mostrar valores pequenos de funding
   return sign + pct.toFixed(4) + '%';
 }
-// Interpreta o funding diff em linguagem natural pro usuário
 function interpretFundingDiff(fundingDiff, spreadSign, labels) {
   if (fundingDiff === null || fundingDiff === undefined) return 'aguardando dados';
   const abs = Math.abs(fundingDiff);
   if (abs < FUNDING_REF * 0.2) return 'neutro — sem crowding relevante';
   const crowded = fundingDiff > 0 ? labels[1] : labels[0];
-  if (spreadSign === 0) return `${crowded} mais crowded long`;
+  if (spreadSign === 0) return crowded + ' mais crowded long';
   const aligned = Math.sign(fundingDiff) === spreadSign;
   return aligned
-    ? `✓ Confirma: ${crowded} crowded + esticado`
-    : `⚠ Divergente — funding não confirma spread`;
+    ? '✓ Confirma: ' + crowded + ' crowded + esticado'
+    : '⚠ Divergente — funding não confirma spread';
 }
+
 // ══════════════════════════════════════════════════════════════
 // UI UPDATE
-// recordSample: se true (default), adiciona amostra ao history. Use false quando
-// chamado de fetchFunding (que só atualiza valores em background, sem novo tick).
 // ══════════════════════════════════════════════════════════════
 function updateUI(pair, recordSample = true) {
   const s = S[pair];
@@ -1142,7 +992,7 @@ function updateUI(pair, recordSample = true) {
   const statusEl = document.getElementById(pair + '-status');
   dot.className = 'dot' + (s.connected ? ' on' : '');
   statusEl.textContent = s.connected
-    ? `Conectado (${s.tickerA || cfg.a.coin} · ${s.tickerB || cfg.b.coin})`
+    ? 'Conectado (' + (s.tickerA || cfg.a.coin) + ' · ' + (s.tickerB || cfg.b.coin) + ')'
     : 'Desconectado';
   document.getElementById(pair + '-updated').textContent = 'Atualizado: ' + new Date().toLocaleTimeString('pt-BR');
   const prices = [s.curA, s.curB];
@@ -1170,8 +1020,6 @@ function updateUI(pair, recordSample = true) {
   }
   const spread = pcts[1] - pcts[0];
   const absSpread = Math.abs(spread);
-  // Record history apenas em ticks reais de preço (fetchPrices). Quando updateUI é
-  // chamado de fetchFunding, skip — senão dobraríamos a densidade do histórico.
   if (recordSample) {
     s.spreadHistory.push({ time: new Date(), spread });
     if (s.spreadHistory.length > s.maxSamples) s.spreadHistory.shift();
@@ -1181,12 +1029,9 @@ function updateUI(pair, recordSample = true) {
   const velocity = computeVelocity(s.spreadHistory);
   const threshold = parseFloat(document.getElementById(pair + '-threshold').value) || 0.15;
   const ztThreshold = parseFloat(document.getElementById(pair + '-zt').value) || 1.5;
-  // Funding diff: fundingB - fundingA (mesma convenção do spread = pctB - pctA)
   const fundingDiff = (s.fundingA !== null && s.fundingB !== null) ? (s.fundingB - s.fundingA) : null;
   const spreadSign = absSpread < 1e-9 ? 0 : (spread > 0 ? 1 : -1);
   const strength = signalStrength(absSpread, threshold, zscore, ztThreshold, velocity, spreadSign, fundingDiff);
-  // Telegram — só dispara em ticks reais de preço (recordSample=true) pra não
-  // mandar duplicado quando fetchFunding também chama updateUI.
   if (recordSample) {
     maybeNotify(pair, {
       spread, pctA: pcts[0], pctB: pcts[1],
@@ -1201,7 +1046,7 @@ function updateUI(pair, recordSample = true) {
   spreadEl.style.color = absSpread >= threshold ? (spread > 0 ? 'var(--green)' : 'var(--red)') : 'var(--text)';
   const fmt = v => (v >= 0 ? '+' : '') + v.toFixed(4) + '%';
   document.getElementById(pair + '-spread-detail').textContent =
-    `${labels[1]}: ${fmt(pcts[1])}   |   ${labels[0]}: ${fmt(pcts[0])}`;
+    labels[1] + ': ' + fmt(pcts[1]) + '   |   ' + labels[0] + ': ' + fmt(pcts[0]);
   renderLegs(pair, spread, pcts, closes, prices, labels, threshold);
   updatePnl(pair, spread, labels);
   const zEl = document.getElementById(pair + '-zscore');
@@ -1214,7 +1059,6 @@ function updateUI(pair, recordSample = true) {
     vEl.textContent = (velocity >= 0 ? '+' : '') + velocity.toFixed(4) + '%';
     vEl.className = 'sig-val ' + (Math.abs(velocity) > threshold * 0.3 ? (velocity > 0 ? 'pos' : 'neg') : 'neu');
   } else { vEl.textContent = '—'; vEl.className = 'sig-val neu'; }
-  // Funding cards — labels, valores individuais e diff
   const fLblA = document.getElementById(pair + '-funding-lbl-a');
   const fLblB = document.getElementById(pair + '-funding-lbl-b');
   if (fLblA) fLblA.textContent = labels[0];
@@ -1233,7 +1077,6 @@ function updateUI(pair, recordSample = true) {
   }
   if (fDEl) {
     fDEl.textContent = fmtFunding(fundingDiff);
-    // Cor do diff: se alinhado com spread -> verde (confirma), se divergente -> amarelo, senão neutro
     let diffCls = 'neu';
     if (fundingDiff !== null && spreadSign !== 0 && Math.abs(fundingDiff) >= FUNDING_REF * 0.2) {
       diffCls = Math.sign(fundingDiff) === spreadSign ? 'pos' : 'neg';
@@ -1261,8 +1104,9 @@ function updateUI(pair, recordSample = true) {
   addHistRow(pair, spread, pcts, zscore);
   drawChart(pair);
 }
+
 // ══════════════════════════════════════════════════════════════
-// P&L CALCULATOR
+// P&L
 // ══════════════════════════════════════════════════════════════
 function updatePnl(pair, spread, labels) {
   if (spread === undefined) {
@@ -1303,37 +1147,39 @@ function updatePnl(pair, spread, labels) {
   }
   try { localStorage.setItem('sm_pnl_' + pair, JSON.stringify({ sA, sB })); } catch(e) {}
 }
+
 // ══════════════════════════════════════════════════════════════
-// RENDER LEGS
+// LEGS
 // ══════════════════════════════════════════════════════════════
 function renderLegs(pair, spread, pcts, closes, prices, labels, threshold) {
   const container = document.getElementById(pair + '-legs');
   const absSpread = Math.abs(spread);
   if (absSpread < threshold) {
-    container.innerHTML = `<div class="leg leg-neutral" style="flex:1;text-align:center">
-      <div class="leg-label" style="color:var(--muted)">Spread normal</div>
-      <div class="leg-desc">Spread de ${absSpread.toFixed(4)}% abaixo do threshold de ${threshold}%</div>
-    </div>`; return;
+    container.innerHTML = '<div class="leg leg-neutral" style="flex:1;text-align:center">' +
+      '<div class="leg-label" style="color:var(--muted)">Spread normal</div>' +
+      '<div class="leg-desc">Spread de ' + absSpread.toFixed(4) + '% abaixo do threshold de ' + threshold + '%</div></div>';
+    return;
   }
   let longIdx = spread > 0 ? 0 : 1, shortIdx = spread > 0 ? 1 : 0;
   const fmt = v => (v >= 0 ? '+' : '') + v.toFixed(4) + '%';
   const fmtP = v => v !== null ? v.toFixed(2) : '—';
-  container.innerHTML = `
-    <div class="leg leg-long" style="flex:1">
-      <div class="leg-label" style="color:var(--green)">LONG ${labels[longIdx]}</div>
-      <div class="leg-close">CME close: <strong>${fmtP(closes[longIdx])}</strong></div>
-      <div class="leg-current">${fmtP(prices[longIdx])}</div>
-      <div class="leg-pct ${pcts[longIdx] >= 0 ? 'pos' : 'neg'}">${fmt(pcts[longIdx])}</div>
-      <div class="leg-desc">Ficou atrás de ${labels[shortIdx]} — espera-se convergência para cima</div>
-    </div>
-    <div class="leg leg-short" style="flex:1">
-      <div class="leg-label" style="color:var(--red)">SHORT ${labels[shortIdx]}</div>
-      <div class="leg-close">CME close: <strong>${fmtP(closes[shortIdx])}</strong></div>
-      <div class="leg-current">${fmtP(prices[shortIdx])}</div>
-      <div class="leg-pct ${pcts[shortIdx] >= 0 ? 'pos' : 'neg'}">${fmt(pcts[shortIdx])}</div>
-      <div class="leg-desc">Esticou mais que ${labels[longIdx]} — espera-se convergência para baixo</div>
-    </div>`;
+  container.innerHTML =
+    '<div class="leg leg-long" style="flex:1">' +
+      '<div class="leg-label" style="color:var(--green)">LONG ' + labels[longIdx] + '</div>' +
+      '<div class="leg-close">CME close: <strong>' + fmtP(closes[longIdx]) + '</strong></div>' +
+      '<div class="leg-current">' + fmtP(prices[longIdx]) + '</div>' +
+      '<div class="leg-pct ' + (pcts[longIdx] >= 0 ? 'pos' : 'neg') + '">' + fmt(pcts[longIdx]) + '</div>' +
+      '<div class="leg-desc">Ficou atrás de ' + labels[shortIdx] + ' — espera-se convergência para cima</div>' +
+    '</div>' +
+    '<div class="leg leg-short" style="flex:1">' +
+      '<div class="leg-label" style="color:var(--red)">SHORT ' + labels[shortIdx] + '</div>' +
+      '<div class="leg-close">CME close: <strong>' + fmtP(closes[shortIdx]) + '</strong></div>' +
+      '<div class="leg-current">' + fmtP(prices[shortIdx]) + '</div>' +
+      '<div class="leg-pct ' + (pcts[shortIdx] >= 0 ? 'pos' : 'neg') + '">' + fmt(pcts[shortIdx]) + '</div>' +
+      '<div class="leg-desc">Esticou mais que ' + labels[longIdx] + ' — espera-se convergência para baixo</div>' +
+    '</div>';
 }
+
 // ══════════════════════════════════════════════════════════════
 // HISTORY
 // ══════════════════════════════════════════════════════════════
@@ -1342,23 +1188,23 @@ function addHistRow(pair, spread, pcts, zscore) {
   const tbody = document.getElementById(pair + '-hist');
   const s = S[pair];
   const fmt = v => (v >= 0 ? '+' : '') + v.toFixed(4) + '%';
-  const sc = Math.abs(spread) > parseFloat(document.getElementById(pair+'-threshold').value||0.15)
+  const sc = Math.abs(spread) > parseFloat(document.getElementById(pair + '-threshold').value || 0.15)
     ? (spread > 0 ? 'pos' : 'neg') : '';
   const zTxt = zscore !== null ? (zscore >= 0 ? '+' : '') + zscore.toFixed(2) + 'σ' : '—';
-  const zCls = zscore !== null && Math.abs(zscore) >= (parseFloat(document.getElementById(pair+'-zt').value)||1.5) ? (zscore>0?'pos':'neg') : '';
+  const zCls = zscore !== null && Math.abs(zscore) >= (parseFloat(document.getElementById(pair + '-zt').value) || 1.5) ? (zscore > 0 ? 'pos' : 'neg') : '';
   const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td>${new Date().toLocaleTimeString('pt-BR')}</td>
-    <td>${s.curA !== null ? s.curA.toFixed(2) : '—'}</td>
-    <td class="${pcts[0] >= 0 ? 'pos' : 'neg'}">${fmt(pcts[0])}</td>
-    <td>${s.curB !== null ? s.curB.toFixed(2) : '—'}</td>
-    <td class="${pcts[1] >= 0 ? 'pos' : 'neg'}">${fmt(pcts[1])}</td>
-    <td class="${sc}" style="font-weight:600">${(spread >= 0 ? '+' : '') + spread.toFixed(4)}%</td>
-    <td class="${zCls}">${zTxt}</td>`;
+  tr.innerHTML =
+    '<td>' + new Date().toLocaleTimeString('pt-BR') + '</td>' +
+    '<td>' + (s.curA !== null ? s.curA.toFixed(2) : '—') + '</td>' +
+    '<td class="' + (pcts[0] >= 0 ? 'pos' : 'neg') + '">' + fmt(pcts[0]) + '</td>' +
+    '<td>' + (s.curB !== null ? s.curB.toFixed(2) : '—') + '</td>' +
+    '<td class="' + (pcts[1] >= 0 ? 'pos' : 'neg') + '">' + fmt(pcts[1]) + '</td>' +
+    '<td class="' + sc + '" style="font-weight:600">' + ((spread >= 0 ? '+' : '') + spread.toFixed(4)) + '%</td>' +
+    '<td class="' + zCls + '">' + zTxt + '</td>';
   tbody.firstChild ? tbody.insertBefore(tr, tbody.firstChild) : tbody.appendChild(tr);
-  // Limita as linhas do log a 200
   while (tbody.children.length > 200) tbody.removeChild(tbody.lastChild);
 }
+
 // ══════════════════════════════════════════════════════════════
 // CHART
 // ══════════════════════════════════════════════════════════════
@@ -1371,12 +1217,12 @@ function drawChart(pair) {
   canvas.style.width = rect.width + 'px'; canvas.style.height = rect.height + 'px';
   ctx.scale(dpr, dpr);
   const W = rect.width, H = rect.height;
-  const pad = { t:18, r:56, b:26, l:8 };
+  const pad = { t: 18, r: 56, b: 26, l: 8 };
   ctx.clearRect(0, 0, W, H);
   const data = S[pair].spreadHistory;
   if (data.length < 2) {
     ctx.fillStyle = '#8b949e'; ctx.font = '12px -apple-system,sans-serif';
-    ctx.textAlign = 'center'; ctx.fillText('Aguardando dados...', W/2, H/2); return;
+    ctx.textAlign = 'center'; ctx.fillText('Aguardando dados...', W / 2, H / 2); return;
   }
   const spreads = data.map(d => d.spread);
   const stats = computeStats(S[pair].spreadHistory);
@@ -1385,13 +1231,13 @@ function drawChart(pair) {
   const maxS = Math.max(...spreads, threshold * 1.5);
   const range = maxS - minS || 0.1;
   const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
-  const xS = i => pad.l + (i / (data.length-1)) * cW;
+  const xS = i => pad.l + (i / (data.length - 1)) * cW;
   const yS = v => pad.t + cH - ((v - minS) / range) * cH;
   ctx.fillStyle = 'rgba(248,81,73,0.05)';
   ctx.fillRect(pad.l, yS(maxS), cW, yS(threshold) - yS(maxS));
   ctx.fillRect(pad.l, yS(-threshold), cW, yS(minS) - yS(-threshold));
-  const lines = [[0,'rgba(139,148,158,0.3)',[4,4]], [threshold,'rgba(248,81,73,0.25)',[3,4]], [-threshold,'rgba(248,81,73,0.25)',[3,4]]];
-  if (stats) lines.push([stats.mean, 'rgba(88,166,255,0.3)', [2,3]]);
+  const lines = [[0, 'rgba(139,148,158,0.3)', [4, 4]], [threshold, 'rgba(248,81,73,0.25)', [3, 4]], [-threshold, 'rgba(248,81,73,0.25)', [3, 4]]];
+  if (stats) lines.push([stats.mean, 'rgba(88,166,255,0.3)', [2, 3]]);
   lines.forEach(([v, color, dash]) => {
     ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.setLineDash(dash);
     ctx.beginPath(); ctx.moveTo(pad.l, yS(v)); ctx.lineTo(W - pad.r, yS(v)); ctx.stroke();
@@ -1399,48 +1245,43 @@ function drawChart(pair) {
   ctx.setLineDash([]);
   ctx.globalAlpha = 0.06;
   ctx.beginPath(); ctx.moveTo(xS(0), yS(0));
-  data.forEach((d,i) => ctx.lineTo(xS(i), yS(d.spread)));
-  ctx.lineTo(xS(data.length-1), yS(0)); ctx.closePath();
-  ctx.fillStyle = data[data.length-1].spread >= 0 ? '#3fb950' : '#f85149';
+  data.forEach((d, i) => ctx.lineTo(xS(i), yS(d.spread)));
+  ctx.lineTo(xS(data.length - 1), yS(0)); ctx.closePath();
+  ctx.fillStyle = data[data.length - 1].spread >= 0 ? '#3fb950' : '#f85149';
   ctx.fill(); ctx.globalAlpha = 1;
   ctx.strokeStyle = '#58a6ff'; ctx.lineWidth = 1.6;
   ctx.beginPath();
-  data.forEach((d,i) => { i===0 ? ctx.moveTo(xS(i),yS(d.spread)) : ctx.lineTo(xS(i),yS(d.spread)); });
+  data.forEach((d, i) => { i === 0 ? ctx.moveTo(xS(i), yS(d.spread)) : ctx.lineTo(xS(i), yS(d.spread)); });
   ctx.stroke();
-  const last = data[data.length-1];
-  ctx.beginPath(); ctx.arc(xS(data.length-1), yS(last.spread), 3.5, 0, Math.PI*2);
+  const last = data[data.length - 1];
+  ctx.beginPath(); ctx.arc(xS(data.length - 1), yS(last.spread), 3.5, 0, Math.PI * 2);
   ctx.fillStyle = last.spread >= 0 ? '#3fb950' : '#f85149'; ctx.fill();
   ctx.fillStyle = '#8b949e'; ctx.font = '10px -apple-system,sans-serif'; ctx.textAlign = 'left';
-  for (let i=0; i<=4; i++) {
-    const v = minS + (range/4)*i;
-    ctx.fillText((v>=0?'+':'')+v.toFixed(3)+'%', W-pad.r+4, yS(v)+4);
+  for (let i = 0; i <= 4; i++) {
+    const v = minS + (range / 4) * i;
+    ctx.fillText((v >= 0 ? '+' : '') + v.toFixed(3) + '%', W - pad.r + 4, yS(v) + 4);
   }
   if (stats) {
     ctx.fillStyle = 'rgba(88,166,255,0.7)';
-    ctx.fillText('μ '+stats.mean.toFixed(3)+'%', W-pad.r+4, yS(stats.mean)-4);
+    ctx.fillText('μ ' + stats.mean.toFixed(3) + '%', W - pad.r + 4, yS(stats.mean) - 4);
   }
   ctx.fillStyle = '#8b949e'; ctx.textAlign = 'center';
   const steps = Math.min(5, data.length);
-  for (let i=0; i<steps; i++) {
-    const idx = Math.floor((i/(steps-1||1))*(data.length-1));
+  for (let i = 0; i < steps; i++) {
+    const idx = Math.floor((i / (steps - 1 || 1)) * (data.length - 1));
     const t = data[idx].time;
-    ctx.fillText(t.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}), xS(idx), H-6);
+    ctx.fillText(t.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }), xS(idx), H - 6);
   }
 }
+
 // ══════════════════════════════════════════════════════════════
-// POLLING
+// POLLING — agora delega pro Web Worker
 // ══════════════════════════════════════════════════════════════
 function startPolling(pair) {
-  // Preço — intervalo configurável (default 3s)
-  clearInterval(S[pair].timer);
-  fetchPrices(pair);
-  const ms = (parseInt(document.getElementById(pair+'-refresh').value) || 3) * 1000;
-  S[pair].timer = setInterval(() => fetchPrices(pair), ms);
-  // Funding — intervalo fixo (30s). Muda lentamente, não precisa tick rápido.
-  clearInterval(S[pair].fundingTimer);
-  fetchFunding(pair);
-  S[pair].fundingTimer = setInterval(() => fetchFunding(pair), FUNDING_REFRESH_MS);
+  const sec = parseInt(document.getElementById(pair + '-refresh').value) || 3;
+  worker.postMessage({ type: 'startPolling', pair, refreshSec: sec });
 }
+
 // ══════════════════════════════════════════════════════════════
 // AUDIO
 // ══════════════════════════════════════════════════════════════
@@ -1449,13 +1290,14 @@ function playBeep() {
   if (Date.now() - lastBeep < 10000) return;
   lastBeep = Date.now();
   try {
-    const ac = new (window.AudioContext||window.webkitAudioContext)();
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
     const o = ac.createOscillator(), g = ac.createGain();
     o.connect(g); g.connect(ac.destination);
     o.frequency.value = 780; o.type = 'sine'; g.gain.value = 0.12;
-    o.start(); g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime+0.4); o.stop(ac.currentTime+0.4);
+    o.start(); g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.4); o.stop(ac.currentTime + 0.4);
   } catch(e) {}
 }
+
 window.addEventListener('resize', () => { drawChart('eq'); drawChart('oil'); });
 </script>
 </body>
